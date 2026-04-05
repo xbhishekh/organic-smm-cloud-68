@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap&font-display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap&font-display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,49 +19,51 @@ input[type="number"] {
 
 @layer base {
   :root {
-    /* ════ ULTRA HIGH-CONTRAST DARK THEME ════ */
-    --background: 222 47% 2%; /* Deep Black/Blue */
-    --foreground: 210 40% 98%;
+    /* ════ ULTRA LUXURY DARK + ROSE GOLD THEME ════ */
+    --background: 240 10% 3.5%;
+    --foreground: 0 0% 95%;
 
-    --card: 222 47% 4%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 10% 5.5%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222 47% 4%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 10% 5.5%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 199 89% 48%; /* Vibrant Cyan/Blue #0ea5e9 */
-    --primary-foreground: 222 47% 2%;
+    --primary: 330 80% 65%;
+    --primary-foreground: 240 10% 3.5%;
 
-    --secondary: 222 47% 10%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 10% 10%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 222 47% 10%;
-    --muted-foreground: 215 20.2% 70%; /* Brighter muted text */
+    --muted: 240 10% 10%;
+    --muted-foreground: 240 5% 55%;
 
-    --accent: 199 89% 48%;
-    --accent-foreground: 222 47% 2%;
+    --accent: 330 80% 65%;
+    --accent-foreground: 240 10% 3.5%;
 
-    --success: 142 71% 55%; /* Brighter success */
-    --success-foreground: 144 61% 5%;
+    --success: 160 60% 50%;
+    --success-foreground: 160 60% 5%;
 
-    --warning: 42 90% 60%; /* Brighter warning */
-    --warning-foreground: 42 90% 5%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 38 92% 5%;
 
-    --destructive: 0 84.2% 65%; /* Brighter destructive */
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
-    --ring: 199 89% 48%;
+    --border: 240 10% 12%;
+    --input: 240 10% 12%;
+    --ring: 330 80% 65%;
 
     --radius: 1.25rem;
 
-    /* ════ NEON GRADIENTS ════ */
-    --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-    --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+    /* ════ ROSE GOLD GRADIENTS ════ */
+    --gradient-primary: linear-gradient(135deg, hsl(330, 80%, 65%) 0%, hsl(280, 60%, 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(340, 90%, 70%) 0%, hsl(300, 70%, 50%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(38, 90%, 60%) 0%, hsl(30, 80%, 50%) 100%);
 
     /* ════ DEPTH SHADOWS ════ */
-    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+    --shadow-glow: 0 0 40px rgba(236, 72, 153, 0.15);
   }
 }
 
@@ -82,33 +84,27 @@ html {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     background-image:
-      radial-gradient(at 0% 0%, hsla(199, 89%, 48%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(222, 47%, 8%, 0.6) 0px, transparent 60%);
+      radial-gradient(at 0% 0%, hsla(330, 80%, 65%, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(280, 60%, 40%, 0.04) 0px, transparent 60%);
     background-attachment: fixed;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
-    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   }
 
-  label,
-  .label {
+  label, .label {
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: 0.05em;
-    @apply text-slate-300 uppercase text-[12px]; /* Brighter and slightly larger */
+    @apply text-slate-300 uppercase text-[12px];
   }
 
   ::selection {
-    background: hsla(199, 89%, 48%, 0.4);
+    background: hsla(330, 80%, 65%, 0.4);
     color: white;
   }
 }
@@ -117,13 +113,18 @@ html {
 
   /* ════ PREMIUM DARK CARDS ════ */
   .three-d-card {
-    @apply relative overflow-hidden rounded-[1.5rem] bg-card border border-white/10;
+    @apply relative overflow-hidden rounded-[1.5rem] bg-card border border-white/[0.06];
+    box-shadow: var(--shadow-soft);
+  }
+
+  .glass-card {
+    @apply relative overflow-hidden rounded-[1.5rem] bg-card border border-white/[0.06];
     box-shadow: var(--shadow-soft);
   }
 
   .glass-premium {
     @apply three-d-card;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(30, 20, 35, 0.7) 0%, rgba(15, 10, 20, 0.9) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
@@ -144,13 +145,14 @@ html {
   .btn-3d {
     @apply relative overflow-hidden font-bold rounded-xl flex items-center justify-center transition-all duration-200;
     background: var(--gradient-primary);
-    color: var(--primary-foreground);
-    box-shadow: 0 4px 20px 0 rgba(6, 182, 212, 0.3);
+    color: white;
+    box-shadow: 0 4px 20px 0 rgba(236, 72, 153, 0.25);
   }
 
   .btn-3d:hover {
     @apply opacity-90;
     transform: translateY(-1px);
+    box-shadow: 0 8px 30px 0 rgba(236, 72, 153, 0.35);
   }
 
   .btn-3d:active {
@@ -185,15 +187,15 @@ html {
   }
 
   .glow-neon {
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.15);
   }
 
-  /* Chrome autofill issue fix - ensures inputs don't turn white/yellow */
+  /* Chrome autofill fix */
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 
   input:-webkit-autofill:focus, 
   input:-webkit-autofill:active{
-      -webkit-box-shadow: 0 0 0 100px #030712 inset !important;
+      -webkit-box-shadow: 0 0 0 100px #0a0a10 inset !important;
       -webkit-text-fill-color: #ffffff !important;
       transition: background-color 5000s ease-in-out 0s;
   }
