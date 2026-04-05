@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscription } from '@/hooks/useSubscription';
+
 import { useCurrency, CURRENCIES, type CurrencyCode } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
