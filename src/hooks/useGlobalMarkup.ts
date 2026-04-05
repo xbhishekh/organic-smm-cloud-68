@@ -9,8 +9,8 @@ export function useGlobalMarkup() {
       const { data, error } = await supabase
         .from('platform_settings')
         .select('global_markup_percent')
-        .eq('id', 'global')
-        .single();
+        .limit(1)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },

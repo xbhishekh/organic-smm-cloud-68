@@ -64,15 +64,22 @@ export default function Admin() {
   // Save markup mutation
   const saveMarkupMutation = useMutation({
     mutationFn: async (percent: number) => {
+      // Update all rows (only 1 row exists)
+      const { data: existing } = await supabase.from('platform_settings').select('id').limit(1).maybeSingle();
+      if (!existing) throw new Error('No platform settings found');
       const { error } = await supabase
         .from('platform_settings')
         .update({ global_markup_percent: percent, updated_at: new Date().toISOString() })
-        .eq('id', 'global');
+        .eq('id', existing.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Global markup updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['platform-settings-markup'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      // Clear localStorage services cache so markup reflects immediately
+      localStorage.removeItem('whopautopilot_services_cache');
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -80,10 +87,12 @@ export default function Admin() {
   // Maintenance mode toggle mutation
   const toggleMaintenanceMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
+      const { data: existing } = await supabase.from('platform_settings').select('id').limit(1).maybeSingle();
+      if (!existing) throw new Error('No platform settings found');
       const { error } = await supabase
         .from('platform_settings')
         .update({ maintenance_mode: enabled, updated_at: new Date().toISOString() } as any)
-        .eq('id', 'global');
+        .eq('id', existing.id);
       if (error) throw error;
     },
     onSuccess: (_, enabled) => {
