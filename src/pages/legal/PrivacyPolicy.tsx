@@ -110,7 +110,7 @@ export default function PrivacyPolicy() {
 
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">11. Contact Us</h2>
-              <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us through our Support page or email us at privacy@whopautopailot.com.</p>
+              <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us through our Support page or email us at privacy@organicsmm.com.</p>
             </section>
           </div>
         </div>
