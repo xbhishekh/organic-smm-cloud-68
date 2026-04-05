@@ -12,7 +12,7 @@ const Index = () => {
       <section className="relative min-h-[100vh] flex flex-col">
         {/* Background image */}
         <div className="absolute inset-0">
-          <img src={heroVisual} alt="" className="w-full h-full object-cover" />
+          <img src={hero3d} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(88,28,135,.88) 0%, rgba(157,23,77,.75) 40%, rgba(234,88,12,.6) 100%)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,.4) 100%)' }} />
         </div>
