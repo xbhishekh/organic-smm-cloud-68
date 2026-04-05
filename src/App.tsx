@@ -97,7 +97,7 @@ const App = () => {
                 
                   <Routes>
                     {/* User pages */}
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={<Auth />} />
                     <Route path="*" element={<NotFound />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/dashboard" element={<Dashboard />} />
