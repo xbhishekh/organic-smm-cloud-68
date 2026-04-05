@@ -76,6 +76,10 @@ export default function Admin() {
     onSuccess: () => {
       toast.success('Global markup updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['platform-settings-markup'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      // Clear localStorage services cache so markup reflects immediately
+      localStorage.removeItem('whopautopilot_services_cache');
     },
     onError: (err: Error) => toast.error(err.message),
   });
