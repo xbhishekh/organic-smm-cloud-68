@@ -124,12 +124,6 @@ export default function Dashboard() {
               <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-2xl">
                 {profile?.full_name || 'User'}
               </h1>
-              {hasActiveSubscription && (
-                <Badge className="bg-primary text-black font-black flex items-center gap-1 px-3 py-1 shadow-lg shadow-primary/20 text-[10px] uppercase tracking-widest border-none">
-                  <Crown className="h-3.5 w-3.5 fill-current" />
-                  {subscription?.plan_type === 'lifetime' ? 'Lifetime Member' : 'Pro Console'}
-                </Badge>
-              )}
             </div>
           </div>
           <div className="flex gap-2.5">
