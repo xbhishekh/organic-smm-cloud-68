@@ -6,97 +6,99 @@ import { PageMeta } from '@/components/seo/PageMeta';
 
 const Index = () => {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #fff 0%, #fdf2f8 30%, #fce7f3 50%, #fdf2f8 70%, #f9fafb 100%)', fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen w-full overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #fff 0%, #fdf2f8 30%, #fce7f3 50%, #fdf2f8 70%, #f9fafb 100%)', fontFamily: "'Inter', system-ui, sans-serif" }}>
       <PageMeta
         title="OrganicSMM — Organic Social Media Growth Platform"
         description="Revolutionary organic social media growth with natural delivery patterns. 100% safe for your accounts."
       />
 
       {/* ═══ NAV ═══ */}
-      <nav className="sticky top-0 z-50" style={{ background: 'rgba(255,255,255,.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,0,0,.06)' }}>
-        <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2.5">
+      <nav className="sticky top-0 z-50 w-full" style={{ background: 'rgba(255,255,255,.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,0,0,.06)' }}>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
             <img src={logo} alt="OrganicSMM" className="w-9 h-9 rounded-xl object-cover" />
             <div className="flex flex-col">
-              <span className="text-[16px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #ec4899, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
+              <span className="text-[15px] sm:text-[16px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+              <span className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #ec4899, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
             </div>
           </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-[13.5px] font-medium" style={{ color: '#666' }}>Features</a>
-            <a href="#how-it-works" className="text-[13.5px] font-medium" style={{ color: '#666' }}>How It Works</a>
-            <a href="#comparison" className="text-[13.5px] font-medium" style={{ color: '#666' }}>Why Us</a>
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <a href="#features" className="text-[13.5px] font-medium hover:text-pink-500 transition-colors" style={{ color: '#666' }}>Features</a>
+            <a href="#how-it-works" className="text-[13.5px] font-medium hover:text-pink-500 transition-colors" style={{ color: '#666' }}>How It Works</a>
+            <a href="#comparison" className="text-[13.5px] font-medium hover:text-pink-500 transition-colors" style={{ color: '#666' }}>Why Us</a>
           </div>
-          <Link to="/auth" className="h-10 px-6 rounded-full text-[13px] font-bold text-white flex items-center gap-1.5" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 4px 14px rgba(236,72,153,.3)' }}>
+          <Link to="/auth" className="h-9 sm:h-10 px-4 sm:px-6 rounded-full text-[12px] sm:text-[13px] font-bold text-white flex items-center gap-1.5 flex-shrink-0" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 4px 14px rgba(236,72,153,.3)' }}>
             Get Started <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </nav>
 
       {/* ═══ HERO ═══ */}
-      <section className="pt-16 sm:pt-24 pb-10 text-center px-6">
-        <div className="max-w-[800px] mx-auto">
-          {/* Updated Version Badge - stylish */}
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-5" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.1), rgba(219,39,119,.06))', border: '1px solid rgba(236,72,153,.18)', boxShadow: '0 2px 12px rgba(236,72,153,.08)' }}>
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ec4899' }}></span>
-              <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#ec4899' }}></span>
-            </span>
-            <span className="text-[11.5px] font-bold uppercase tracking-widest" style={{ color: '#db2777' }}>v2.0 Updated</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(236,72,153,.12)', color: '#be185d' }}>NEW</span>
+      <section className="pt-12 sm:pt-16 lg:pt-24 pb-10 text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+            {/* Updated Version Badge */}
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.1), rgba(219,39,119,.06))', border: '1px solid rgba(236,72,153,.18)', boxShadow: '0 2px 12px rgba(236,72,153,.08)' }}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ec4899' }}></span>
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#ec4899' }}></span>
+              </span>
+              <span className="text-[10px] sm:text-[11.5px] font-bold uppercase tracking-widest" style={{ color: '#db2777' }}>v2.0 Updated</span>
+              <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(236,72,153,.12)', color: '#be185d' }}>NEW</span>
+            </div>
+
+            {/* AI Badge */}
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full" style={{ background: 'rgba(236,72,153,.08)', border: '1px solid rgba(236,72,153,.15)' }}>
+              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: '#ec4899' }} />
+              <span className="text-[11px] sm:text-[13px] font-semibold" style={{ color: '#be185d' }}>World's First AI-Organic Panel</span>
+            </div>
           </div>
 
-          {/* AI Badge */}
-          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-10" style={{ background: 'rgba(236,72,153,.08)', border: '1px solid rgba(236,72,153,.15)' }}>
-            <Zap className="w-4 h-4" style={{ color: '#ec4899' }} />
-            <span className="text-[13px] font-semibold" style={{ color: '#be185d' }}>World's First AI-Organic Panel</span>
-          </div>
-
-          <h1 className="text-[clamp(2.4rem,6vw,4.2rem)] font-black leading-[1.08] tracking-[-0.03em] mb-6" style={{ color: '#1a1a2e', fontFamily: "'Outfit', 'Inter', system-ui, sans-serif" }}>
+          <h1 className="text-4xl sm:text-5xl lg:text-[4.2rem] font-black leading-[1.08] tracking-[-0.03em] mb-5 sm:mb-6" style={{ color: '#1a1a2e', fontFamily: "'Outfit', 'Inter', system-ui, sans-serif" }}>
             Organic Growth{' '}
             <br className="hidden sm:block" />
             Made <span style={{ color: '#ec4899' }}>Simple</span>
           </h1>
 
-          <p className="text-[16px] sm:text-[17px] leading-[1.7] mb-10 max-w-lg mx-auto" style={{ color: '#888' }}>
+          <p className="text-[15px] sm:text-[17px] leading-[1.7] mb-8 sm:mb-10 max-w-lg mx-auto px-2" style={{ color: '#888' }}>
             Revolutionary organic social media growth with natural delivery patterns. 100% <strong style={{ color: '#555' }}>safe</strong> for your accounts.
           </p>
 
           {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-            <Link to="/auth" className="h-13 px-8 py-3.5 rounded-full text-[15px] font-bold text-white flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 8px 28px rgba(236,72,153,.35)' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-7 sm:mb-8">
+            <Link to="/auth" className="w-full sm:w-auto h-12 sm:h-13 px-8 py-3 sm:py-3.5 rounded-full text-[14px] sm:text-[15px] font-bold text-white flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 8px 28px rgba(236,72,153,.35)' }}>
               <Zap className="w-4 h-4" /> Start Growing <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/auth" className="h-13 px-8 py-3.5 rounded-full text-[15px] font-semibold flex items-center gap-2" style={{ color: '#444', border: '1px solid rgba(0,0,0,.12)', background: 'white' }}>
+            <Link to="/auth" className="w-full sm:w-auto h-12 sm:h-13 px-8 py-3 sm:py-3.5 rounded-full text-[14px] sm:text-[15px] font-semibold flex items-center justify-center gap-2" style={{ color: '#444', border: '1px solid rgba(0,0,0,.12)', background: 'white' }}>
               View Services <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           {/* Trust badges */}
-          <div className="flex items-center justify-center gap-5 flex-wrap text-[12.5px] font-medium" style={{ color: '#999' }}>
+          <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap text-[11px] sm:text-[12.5px] font-medium" style={{ color: '#999' }}>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#10b981' }} /> No credit card required</span>
-            <span style={{ color: '#ddd' }}>·</span>
+            <span className="hidden sm:inline" style={{ color: '#ddd' }}>·</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#10b981' }} /> All features included</span>
-            <span style={{ color: '#ddd' }}>·</span>
+            <span className="hidden sm:inline" style={{ color: '#ddd' }}>·</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#10b981' }} /> Instant setup</span>
           </div>
         </div>
       </section>
 
       {/* ═══ UNIQUE FEATURES (small cards row) ═══ */}
-      <section id="features" className="py-16 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-10">
+      <section id="features" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{ background: 'rgba(236,72,153,.08)', border: '1px solid rgba(236,72,153,.12)' }}>
               <Zap className="w-3.5 h-3.5" style={{ color: '#ec4899' }} />
-              <span className="text-[11.5px] font-bold uppercase tracking-widest" style={{ color: '#db2777' }}>World's First AI-Organic Panel</span>
+              <span className="text-[10px] sm:text-[11.5px] font-bold uppercase tracking-widest" style={{ color: '#db2777' }}>World's First AI-Organic Panel</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
               Features <span style={{ color: '#ec4899' }}>No Other Panel Has</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             {[
               { icon: TrendingUp, title: 'S-Curve Pattern', desc: 'Natural viral growth simulation', border: '#ec4899' },
               { icon: Shuffle, title: '±50% Variance', desc: 'Random qty each delivery', border: '#f59e0b' },
@@ -105,12 +107,12 @@ const Index = () => {
               { icon: Timer, title: '±5min Jitter', desc: 'Anti-detection timing', border: '#8b5cf6' },
               { icon: Eye, title: 'Live Preview', desc: 'See delivery before order', border: '#06b6d4' },
             ].map((f) => (
-              <div key={f.title} className="rounded-2xl p-5 text-center transition-all hover:-translate-y-1" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: `3px solid ${f.border}`, boxShadow: '0 4px 20px rgba(0,0,0,.03)' }}>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: '#f5f5f5' }}>
-                  <f.icon className="w-5 h-5" style={{ color: '#333' }} />
+              <div key={f.title} className="rounded-2xl p-4 sm:p-5 text-center transition-all hover:-translate-y-1" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: `3px solid ${f.border}`, boxShadow: '0 4px 20px rgba(0,0,0,.03)' }}>
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mx-auto mb-2.5 sm:mb-3" style={{ background: '#f5f5f5' }}>
+                  <f.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#333' }} />
                 </div>
-                <h3 className="text-[13px] font-bold mb-1" style={{ color: '#1a1a2e' }}>{f.title}</h3>
-                <p className="text-[11px] leading-relaxed" style={{ color: '#999' }}>{f.desc}</p>
+                <h3 className="text-[12px] sm:text-[13px] font-bold mb-1" style={{ color: '#1a1a2e' }}>{f.title}</h3>
+                <p className="text-[10px] sm:text-[11px] leading-relaxed" style={{ color: '#999' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -118,18 +120,18 @@ const Index = () => {
       </section>
 
       {/* ═══ COMPARISON TABLE ═══ */}
-      <section id="comparison" className="py-12 px-6">
-        <div className="max-w-[900px] mx-auto rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: '3px solid', borderImage: 'linear-gradient(90deg, #ec4899, #f59e0b, #10b981, #3b82f6) 1', boxShadow: '0 4px 24px rgba(0,0,0,.04)' }}>
-          <div className="grid md:grid-cols-2 divide-x divide-gray-100">
+      <section id="comparison" className="py-10 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: '3px solid', borderImage: 'linear-gradient(90deg, #ec4899, #f59e0b, #10b981, #3b82f6) 1', boxShadow: '0 4px 24px rgba(0,0,0,.04)' }}>
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
             {/* Regular panels */}
-            <div className="p-8">
-              <div className="flex items-center gap-2.5 mb-5">
+            <div className="p-5 sm:p-8">
+              <div className="flex items-center gap-2.5 mb-4 sm:mb-5">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#f5f5f5' }}>
                   <X className="w-4 h-4" style={{ color: '#999' }} />
                 </div>
-                <span className="text-[15px] font-bold" style={{ color: '#1a1a2e' }}>Regular SMM Panels</span>
+                <span className="text-[14px] sm:text-[15px] font-bold" style={{ color: '#1a1a2e' }}>Regular SMM Panels</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {[
                   'Same quantity every batch = Easy detection',
                   'Fixed intervals = Bot pattern visible',
@@ -138,20 +140,20 @@ const Index = () => {
                 ].map((t) => (
                   <div key={t} className="flex items-start gap-2.5">
                     <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: '#ef4444' }} />
-                    <span className="text-[13px] leading-relaxed" style={{ color: '#666' }}>{t}</span>
+                    <span className="text-[12px] sm:text-[13px] leading-relaxed" style={{ color: '#666' }}>{t}</span>
                   </div>
                 ))}
               </div>
             </div>
             {/* OrganicSMM */}
-            <div className="p-8" style={{ background: '#fefce8' }}>
-              <div className="flex items-center gap-2.5 mb-5">
+            <div className="p-5 sm:p-8" style={{ background: '#fefce8' }}>
+              <div className="flex items-center gap-2.5 mb-4 sm:mb-5">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#dcfce7' }}>
                   <Check className="w-4 h-4" style={{ color: '#16a34a' }} />
                 </div>
-                <span className="text-[15px] font-bold" style={{ color: '#1a1a2e' }}>OrganicSMM (This Panel)</span>
+                <span className="text-[14px] sm:text-[15px] font-bold" style={{ color: '#1a1a2e' }}>OrganicSMM (This Panel)</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {[
                   'Random variance = Looks like real users',
                   'Jittered timing = Undetectable patterns',
@@ -160,20 +162,20 @@ const Index = () => {
                 ].map((t) => (
                   <div key={t} className="flex items-start gap-2.5">
                     <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: '#16a34a' }} />
-                    <span className="text-[13px] leading-relaxed" style={{ color: '#666' }}>{t}</span>
+                    <span className="text-[12px] sm:text-[13px] leading-relaxed" style={{ color: '#666' }}>{t}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
           {/* Stats bar */}
-          <div className="flex items-center justify-center gap-8 flex-wrap py-5 px-6" style={{ borderTop: '1px solid rgba(0,0,0,.06)', background: '#fafafa' }}>
+          <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap py-4 sm:py-5 px-4 sm:px-6" style={{ borderTop: '1px solid rgba(0,0,0,.06)', background: '#fafafa' }}>
             {[
               { icon: '🏆', text: '50,000+ Orders Delivered' },
               { icon: '🛡️', text: 'Zero Account Bans' },
               { icon: '⚡', text: '99.9% Success Rate' },
             ].map((s) => (
-              <span key={s.text} className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: '#555' }}>
+              <span key={s.text} className="flex items-center gap-2 text-[11px] sm:text-[13px] font-semibold" style={{ color: '#555' }}>
                 <span>{s.icon}</span> {s.text}
               </span>
             ))}
@@ -182,16 +184,16 @@ const Index = () => {
       </section>
 
       {/* ═══ FEATURES GRID (larger cards) ═══ */}
-      <section id="how-it-works" className="py-20 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#999' }}>Why Choose Us</p>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
+      <section id="how-it-works" className="py-14 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10 sm:mb-12">
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#999' }}>Why Choose Us</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
               Built for <span style={{ color: '#ec4899' }}>Real Growth</span>
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {[
               { icon: TrendingUp, title: 'Natural Growth Curves', desc: 'Variable delivery quantities that perfectly mimic real organic engagement patterns.', border: '#ec4899' },
               { icon: Zap, title: 'Peak Hour Optimization', desc: 'Higher delivery during active hours (6PM-10PM) for realistic engagement timing.', border: '#f59e0b' },
@@ -200,12 +202,12 @@ const Index = () => {
               { icon: CheckCircle2, title: 'Premium Quality', desc: 'High-quality engagement from real-looking accounts with complete profiles.', border: '#8b5cf6' },
               { icon: Shuffle, title: 'Organic Variance', desc: '±25% random variance on each delivery for unpredictable, natural growth.', border: '#06b6d4' },
             ].map((f) => (
-              <div key={f.title} className="rounded-2xl p-7 transition-all hover:-translate-y-1" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: `3px solid ${f.border}`, boxShadow: '0 4px 20px rgba(0,0,0,.03)' }}>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: '#f5f5f5' }}>
+              <div key={f.title} className="rounded-2xl p-6 sm:p-7 transition-all hover:-translate-y-1" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: `3px solid ${f.border}`, boxShadow: '0 4px 20px rgba(0,0,0,.03)' }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 sm:mb-5" style={{ background: '#f5f5f5' }}>
                   <f.icon className="w-5 h-5" style={{ color: '#333' }} />
                 </div>
-                <h3 className="text-[15px] font-bold mb-2" style={{ color: '#1a1a2e' }}>{f.title}</h3>
-                <p className="text-[13px] leading-relaxed" style={{ color: '#888' }}>{f.desc}</p>
+                <h3 className="text-[14px] sm:text-[15px] font-bold mb-2" style={{ color: '#1a1a2e' }}>{f.title}</h3>
+                <p className="text-[12px] sm:text-[13px] leading-relaxed" style={{ color: '#888' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -213,26 +215,26 @@ const Index = () => {
       </section>
 
       {/* ═══ CTA ═══ */}
-      <section className="py-16 px-6">
-        <div className="max-w-[900px] mx-auto rounded-3xl text-center py-16 px-8" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: '3px solid', borderImage: 'linear-gradient(90deg, #ec4899, #f59e0b, #10b981) 1', boxShadow: '0 8px 32px rgba(0,0,0,.04)' }}>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto rounded-3xl text-center py-12 sm:py-16 px-6 sm:px-8" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', borderTop: '3px solid', borderImage: 'linear-gradient(90deg, #ec4899, #f59e0b, #10b981) 1', boxShadow: '0 8px 32px rgba(0,0,0,.04)' }}>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-4" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui" }}>
             Ready to Grow <span style={{ color: '#ec4899' }}>Organically</span>?
           </h2>
-          <p className="text-[15px] mb-8 max-w-md mx-auto" style={{ color: '#888' }}>
+          <p className="text-[14px] sm:text-[15px] mb-6 sm:mb-8 max-w-md mx-auto" style={{ color: '#888' }}>
             Join thousands of creators and businesses using our organic delivery system. No credit card required to start.
           </p>
-          <Link to="/auth" className="inline-flex h-13 px-8 py-3.5 rounded-full text-[15px] font-bold text-white items-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 8px 28px rgba(236,72,153,.35)' }}>
+          <Link to="/auth" className="inline-flex h-12 sm:h-13 px-8 py-3.5 rounded-full text-[14px] sm:text-[15px] font-bold text-white items-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 8px 28px rgba(236,72,153,.35)' }}>
             Create Free Account <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="py-12 px-6" style={{ background: '#f9fafb', borderTop: '1px solid rgba(0,0,0,.06)' }}>
-        <div className="max-w-[1100px] mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+      <footer className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8" style={{ background: '#f9fafb', borderTop: '1px solid rgba(0,0,0,.06)' }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-8 sm:mb-10">
             {/* Brand */}
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2.5 mb-4">
                 <img src={logo} alt="" className="w-9 h-9 rounded-xl object-cover" />
                 <span className="text-[15px] font-bold" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
@@ -243,7 +245,7 @@ const Index = () => {
             </div>
             {/* Quick Links */}
             <div>
-              <h4 className="text-[13px] font-bold mb-4" style={{ color: '#1a1a2e' }}>Quick Links</h4>
+              <h4 className="text-[13px] font-bold mb-3 sm:mb-4" style={{ color: '#1a1a2e' }}>Quick Links</h4>
               <div className="space-y-2.5">
                 <Link to="/auth" className="block text-[13px] hover:underline" style={{ color: '#ec4899' }}>Get Started</Link>
                 <Link to="/services" className="block text-[13px] hover:underline" style={{ color: '#ec4899' }}>Services</Link>
@@ -251,7 +253,7 @@ const Index = () => {
             </div>
             {/* Legal */}
             <div>
-              <h4 className="text-[13px] font-bold mb-4" style={{ color: '#1a1a2e' }}>Legal</h4>
+              <h4 className="text-[13px] font-bold mb-3 sm:mb-4" style={{ color: '#1a1a2e' }}>Legal</h4>
               <div className="space-y-2.5">
                 {[
                   { to: '/terms', icon: FileText, label: 'Terms of Service' },
@@ -259,15 +261,15 @@ const Index = () => {
                   { to: '/refund', icon: FileText, label: 'Refund Policy' },
                   { to: '/cookies', icon: FileText, label: 'Cookie Policy' },
                 ].map((l) => (
-                  <Link key={l.to} to={l.to} className="flex items-center gap-1.5 text-[13px] hover:underline" style={{ color: '#888' }}>
-                    <l.icon className="w-3 h-3" /> {l.label}
+                  <Link key={l.to} to={l.to} className="flex items-center gap-1.5 text-[12px] sm:text-[13px] hover:underline" style={{ color: '#888' }}>
+                    <l.icon className="w-3 h-3 flex-shrink-0" /> {l.label}
                   </Link>
                 ))}
               </div>
             </div>
             {/* Support */}
             <div>
-              <h4 className="text-[13px] font-bold mb-4" style={{ color: '#1a1a2e' }}>Support</h4>
+              <h4 className="text-[13px] font-bold mb-3 sm:mb-4" style={{ color: '#1a1a2e' }}>Support</h4>
               <div className="space-y-2.5">
                 {[
                   { icon: HelpCircle, label: 'Help Center' },
@@ -275,8 +277,8 @@ const Index = () => {
                   { icon: Code2, label: 'API Documentation' },
                   { icon: Activity, label: 'Status Page' },
                 ].map((l) => (
-                  <span key={l.label} className="flex items-center gap-1.5 text-[13px]" style={{ color: '#888' }}>
-                    <l.icon className="w-3 h-3" /> {l.label}
+                  <span key={l.label} className="flex items-center gap-1.5 text-[12px] sm:text-[13px]" style={{ color: '#888' }}>
+                    <l.icon className="w-3 h-3 flex-shrink-0" /> {l.label}
                   </span>
                 ))}
               </div>
