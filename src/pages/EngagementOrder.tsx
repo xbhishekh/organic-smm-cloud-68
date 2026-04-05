@@ -57,10 +57,8 @@ export default function EngagementOrder() {
   const { user, profile, isLoading: authLoading, isAdmin, wallet, refreshWallet } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { hasActiveSubscription } = useSubscription();
   const { formatPrice } = useCurrency();
   const { applyMarkup } = useGlobalMarkup();
-  const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
 
   // Form State
   const [platform, setPlatform] = useState('instagram');
