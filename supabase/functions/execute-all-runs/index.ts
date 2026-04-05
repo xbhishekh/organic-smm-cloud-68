@@ -789,8 +789,8 @@ serve(async (req) => {
         }
       }
       
-      if (startedRunsForLinkAndType && startedRunsForLinkAndType.length > 0) {
-        for (const stuckRun of startedRunsForLinkAndType) {
+      if (startedRunsForLink && startedRunsForLink.length > 0) {
+        for (const stuckRun of startedRunsForLink) {
           const terminalStatuses = ['Completed', 'Complete', 'Partial', 'Refunded', 'Canceled', 'Cancelled', 'Error', 'Failed', 'Success', 'Refund', 'Canscelled']
           const isTerminal = stuckRun.provider_status && terminalStatuses.includes(stuckRun.provider_status)
           
