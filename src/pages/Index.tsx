@@ -17,7 +17,10 @@ const Index = () => {
         <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2.5">
             <img src={logo} alt="OrganicSMM" className="w-9 h-9 rounded-xl object-cover" />
-            <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+            <div className="flex flex-col">
+              <span className="text-[16px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #ec4899, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
+            </div>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-[13.5px] font-medium" style={{ color: '#666' }}>Features</a>
