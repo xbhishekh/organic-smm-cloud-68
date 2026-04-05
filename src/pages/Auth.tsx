@@ -8,7 +8,7 @@ import { Mail, Lock, User, Loader2, ArrowLeft, Shield, Zap, Eye, EyeOff, ArrowRi
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import logo from '@/assets/logo.jpg';
-import hero3d from '@/assets/hero-3d.jpg';
+
 
 const loginSchema = z.object({
   email: z.string().trim().email('Invalid email address'),
