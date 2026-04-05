@@ -8,7 +8,7 @@ import { Mail, Lock, User, Loader2, ArrowLeft, Shield, Zap, Eye, EyeOff, ArrowRi
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import logo from '@/assets/logo.jpg';
-import heroVisual from '@/assets/hero-visual.jpg';
+import hero3d from '@/assets/hero-3d.jpg';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Invalid email address'),
@@ -97,8 +97,8 @@ export default function Auth() {
     <div className="min-h-screen flex">
       {/* Left — visual panel */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center">
-        <img src={heroVisual} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(88,28,135,.88), rgba(157,23,77,.78), rgba(234,88,12,.65))' }} />
+        <img src={hero3d} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(88,28,135,.82), rgba(147,51,234,.7), rgba(236,72,153,.6))' }} />
         <div className="relative z-10 max-w-md px-10 text-white">
           <img src={logo} alt="OrganicSMM" className="w-14 h-14 rounded-xl object-cover mb-8 shadow-xl" />
           <h2 className="text-4xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
