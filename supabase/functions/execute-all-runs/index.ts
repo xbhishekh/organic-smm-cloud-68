@@ -715,7 +715,8 @@ serve(async (req) => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000)
       const isThisRunOverdue = runScheduledAt < fiveMinAgo
 
-      // SMART WAIT MODE: Prevent duplicate orders for SAME SERVICE ID on same panel.
+      // SMART WAIT MODE: Prevent duplicate orders for SAME LINK on same provider panel.
+      // If Provider 1 has ANY active order (views/likes/comments) for this link, skip it entirely.
       const sameLink = (item.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
       const currentServiceId = item.service?.id
       
@@ -734,22 +735,12 @@ serve(async (req) => {
         continue
       }
       
-      // ============================================
-      // PER-PROVIDER LINK GUARD (New Parallel Multi-Provider Logic):
-      // We no longer block the RUN entirely if another run is active for the same link.
-      // Instead, we let it proceed to the Provider Selection Phase.
-      // The logic below will map ALL currently active runs for this link to their respective providers,
-      // and add those providers to `busyAccountIds`.
-      // If Provider 1 is busy with this link, it skips Provider 1 and selects Provider 2!
-      // If ALL providers are busy, it will gracefully exit and wait for one to finish. 
-      // ============================================
-      
-      // 1. Check STARTED runs for same link + same service_id
-      // USE PRE-FETCHED Global activeRuns for better performance
-      const startedRunsForLinkAndType = (activeRuns || []).filter((r: any) => {
+      // 1. Check STARTED runs for same LINK (ANY engagement type, not just same service)
+      // This prevents sending to a provider that already has an active order for this link
+      // Provider APIs reject with "active order with this link" regardless of service type
+      const startedRunsForLink = (activeRuns || []).filter((r: any) => {
         const runLink = (r.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
-        const runServiceId = r.engagement_order_item?.service_id || ''
-        return runLink === sameLink && runServiceId === currentServiceId
+        return runLink === sameLink
       })
       
       // 2. PROVIDER STATUS CHECK: DISABLED
@@ -798,8 +789,8 @@ serve(async (req) => {
         }
       }
       
-      if (startedRunsForLinkAndType && startedRunsForLinkAndType.length > 0) {
-        for (const stuckRun of startedRunsForLinkAndType) {
+      if (startedRunsForLink && startedRunsForLink.length > 0) {
+        for (const stuckRun of startedRunsForLink) {
           const terminalStatuses = ['Completed', 'Complete', 'Partial', 'Refunded', 'Canceled', 'Cancelled', 'Error', 'Failed', 'Success', 'Refund', 'Canscelled']
           const isTerminal = stuckRun.provider_status && terminalStatuses.includes(stuckRun.provider_status)
           
