@@ -69,10 +69,10 @@ export default function RazorpayDepositCard() {
         const ext = screenshot.name.split('.').pop() || 'jpg';
         const path = `${user?.id}/${Date.now()}.${ext}`;
         const { error: uploadErr } = await supabase.storage
-          .from('payment-proofs')
+          .from('deposit-screenshots')
           .upload(path, screenshot, { upsert: true });
         if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from('payment-proofs').getPublicUrl(path);
+        const { data: urlData } = supabase.storage.from('deposit-screenshots').getPublicUrl(path);
         screenshotUrl = urlData.publicUrl;
       }
 
