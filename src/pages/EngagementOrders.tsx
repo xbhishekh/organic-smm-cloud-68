@@ -63,14 +63,15 @@ export default function EngagementOrders() {
       const { data, error } = await supabase
         .from('engagement_orders')
         .select(`
-          *,
+          id, order_number, status, total_price, link, base_quantity, created_at, updated_at, is_organic_mode,
           items:engagement_order_items(
-            *,
+            id, engagement_type, quantity, status,
             runs:organic_run_schedule(id, status, quantity_to_send, scheduled_at, run_number)
           )
         `)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
       if (error) throw error;
       return data;
     },
