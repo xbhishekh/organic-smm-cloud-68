@@ -80,9 +80,10 @@ export default function Orders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, service:services(name, category)')
+        .select('id, order_number, status, price, link, quantity, remains, start_count, provider_order_id, is_organic_mode, is_drip_feed, created_at, updated_at, error_message, service:services(name, category)')
         .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(200);
       
       if (error) throw error;
       return data as (Order & { service: { name: string; category: string } | null })[];
