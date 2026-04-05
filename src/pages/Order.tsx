@@ -1375,11 +1375,6 @@ export default function Order() {
         </div>
       </div>
 
-      {/* Subscription Check Dialog */}
-      <SubscriptionCheckDialog
-        open={showSubscriptionDialog}
-        onOpenChange={setShowSubscriptionDialog}
-      />
     </DashboardLayout>
   );
 }

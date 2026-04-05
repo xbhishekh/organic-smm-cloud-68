@@ -347,11 +347,6 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-      <SubscriptionRequestDialog
-        open={showRequestDialog}
-        onOpenChange={setShowRequestDialog}
-        planType={selectedPlan}
-      />
     </DashboardLayout>
   );
 }

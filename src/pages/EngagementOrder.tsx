@@ -922,11 +922,6 @@ export default function EngagementOrder() {
         </Card>
       </div>
 
-      {/* Subscription Check Dialog */}
-      <SubscriptionCheckDialog
-        open={showSubscriptionDialog}
-        onOpenChange={setShowSubscriptionDialog}
-      />
     </DashboardLayout>
   );
 }
