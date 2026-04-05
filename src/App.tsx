@@ -9,7 +9,7 @@ import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { toast } from "sonner";
 import { AppErrorBoundary } from "@/components/app/AppErrorBoundary";
-import { GlobalSubscriptionGuard } from "@/components/subscription/GlobalSubscriptionGuard";
+
 
 // ALL pages eager-loaded for instantaneous navigation
 import Index from "./pages/Index";
