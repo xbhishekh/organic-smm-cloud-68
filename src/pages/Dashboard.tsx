@@ -17,19 +17,23 @@ export default function Dashboard() {
   const { data: recentOrders } = useQuery({
     queryKey: ['recent-orders', user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from('orders').select('*, service:services(name, category)').eq('user_id', user?.id).order('created_at', { ascending: false }).limit(5);
+      const { data } = await supabase.from('orders').select('id, status, price, link, created_at, service:services(name, category)').eq('user_id', user?.id).order('created_at', { ascending: false }).limit(5);
       return data || [];
     },
     enabled: !!user?.id,
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: engagementOrders } = useQuery({
     queryKey: ['recent-engagement-orders', user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from('engagement_orders').select('*, items:engagement_order_items(engagement_type, quantity, status)').eq('user_id', user?.id).order('created_at', { ascending: false }).limit(5);
+      const { data } = await supabase.from('engagement_orders').select('id, order_number, status, total_price, link, created_at, base_quantity, items:engagement_order_items(engagement_type, quantity, status)').eq('user_id', user?.id).order('created_at', { ascending: false }).limit(5);
       return data || [];
     },
     enabled: !!user?.id,
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: stats } = useQuery({
@@ -44,6 +48,8 @@ export default function Dashboard() {
       return { totalOrders, completedOrders, activeOrders, totalSpent };
     },
     enabled: !!user?.id,
+    staleTime: 60000,
+    refetchOnWindowFocus: false,
   });
 
   const statusColor: Record<string, string> = {
