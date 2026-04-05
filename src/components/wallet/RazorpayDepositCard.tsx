@@ -196,33 +196,38 @@ export default function RazorpayDepositCard() {
           <div className="p-5 space-y-5">
             {/* Pay instruction */}
             <div className="rounded-xl p-4" style={{ background: 'rgba(236,72,153,.04)', border: '1px solid rgba(236,72,153,.1)' }}>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full text-[11px] font-bold text-white flex items-center justify-center" style={{ background: '#ec4899' }}>1</span>
-                  <span className="text-[13px] font-bold" style={{ color: '#1a1a2e' }}>Pay Online</span>
+                  <span className="text-[13px] font-bold" style={{ color: '#1a1a2e' }}>Pay ₹{inrAmount}</span>
                 </div>
-                <span className="text-[16px] font-bold" style={{ color: '#ec4899' }}>₹{inrAmount}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={() => window.open(RAZORPAY_PAGE_URL, '_blank')}
-                  className="h-11 rounded-xl text-[12px] font-semibold text-white"
-                  style={{ background: '#ec4899' }}
-                >
-                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Payment
-                </Button>
-                <Button
-                  onClick={() => copyToClipboard(RAZORPAY_PAGE_URL, 'URL')}
-                  variant="outline"
-                  className="h-11 rounded-xl text-[12px] font-semibold"
-                  style={{ border: '1px solid rgba(0,0,0,.1)', color: '#555' }}
-                >
-                  <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy Link
-                </Button>
-              </div>
-              <p className="text-[10px] mt-3 p-2 rounded-lg" style={{ background: 'rgba(245,158,11,.06)', color: '#d97706', border: '1px solid rgba(245,158,11,.12)' }}>
-                ⚠️ After payment, copy the <strong>12-Digit UTR ID</strong> to verify below.
+
+              <p className="text-[12px] mb-3 leading-relaxed" style={{ color: '#666' }}>
+                Niche link pe click karo aur <strong>Paytm, Google Pay, PhonePe, WhatsApp Pay</strong> ya UPI se payment karo.
               </p>
+
+              <Button
+                onClick={() => window.open(RAZORPAY_PAGE_URL, '_blank')}
+                className="w-full h-12 rounded-xl text-[13px] font-bold text-white mb-2"
+                style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 4px 14px rgba(236,72,153,.3)' }}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" /> Pay Now — ₹{inrAmount}
+              </Button>
+
+              <button
+                onClick={() => copyToClipboard(RAZORPAY_PAGE_URL, 'Payment Link')}
+                className="w-full flex items-center justify-center gap-1.5 h-9 rounded-lg text-[11px] font-medium transition-colors"
+                style={{ color: '#999', border: '1px solid rgba(0,0,0,.06)' }}
+              >
+                <Copy className="h-3 w-3" /> Copy Payment Link
+              </button>
+
+              <div className="mt-3 p-2.5 rounded-lg" style={{ background: 'rgba(245,158,11,.06)', border: '1px solid rgba(245,158,11,.12)' }}>
+                <p className="text-[10px] font-medium" style={{ color: '#d97706' }}>
+                  ⚠️ Payment ke baad <strong>12-Digit UTR ID</strong> copy karo aur niche paste karo.
+                </p>
+              </div>
             </div>
 
             {/* Submit proof */}
