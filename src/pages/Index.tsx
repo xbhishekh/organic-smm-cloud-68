@@ -10,7 +10,6 @@ const Index = () => {
       <PageMeta
         title="OrganicSMM — Organic Social Media Growth Platform"
         description="Revolutionary organic social media growth with natural delivery patterns. 100% safe for your accounts."
-        keywords="SMM panel, organic growth, social media marketing, instagram followers, youtube views"
       />
 
       {/* ═══ NAV ═══ */}
