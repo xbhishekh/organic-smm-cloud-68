@@ -83,10 +83,12 @@ export default function Admin() {
   // Maintenance mode toggle mutation
   const toggleMaintenanceMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
+      const { data: existing } = await supabase.from('platform_settings').select('id').limit(1).maybeSingle();
+      if (!existing) throw new Error('No platform settings found');
       const { error } = await supabase
         .from('platform_settings')
         .update({ maintenance_mode: enabled, updated_at: new Date().toISOString() } as any)
-        .eq('id', 'global');
+        .eq('id', existing.id);
       if (error) throw error;
     },
     onSuccess: (_, enabled) => {
