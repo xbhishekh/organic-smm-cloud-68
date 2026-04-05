@@ -50,7 +50,7 @@ const adminNavItems = [
 export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
   const { isAdmin, signOut, wallet, profile } = useAuth();
-  const { hasActiveSubscription } = useSubscription();
+  
   const { currency, setCurrency, formatPrice, currencyInfo } = useCurrency();
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
