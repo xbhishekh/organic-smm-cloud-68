@@ -29,7 +29,7 @@ import { Button } from '@/components/ui/button';
 import { PageMeta } from '@/components/seo/PageMeta';
 import { Badge } from '@/components/ui/badge';
 import { format, formatDistanceToNow } from 'date-fns';
-import { SubscriptionRequestDialog } from '@/components/subscription/SubscriptionRequestDialog';
+
 import { useState } from 'react';
 
 export default function Dashboard() {
