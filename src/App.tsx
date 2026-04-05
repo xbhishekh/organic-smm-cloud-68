@@ -121,7 +121,7 @@ const App = () => {
                     <Route path="/admin/orders" element={<AdminOrders />} />
                     <Route path="/admin/bundles" element={<AdminBundles />} />
                     <Route path="/admin/cron-monitor" element={<AdminCronMonitor />} />
-                    <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+                    
                     <Route path="/admin/chat" element={<AdminChat />} />
                     <Route path="/admin/deposits" element={<AdminDeposits />} />
                     <Route path="/admin/provider-accounts" element={<AdminProviderAccounts />} />
