@@ -13,382 +13,211 @@ import {
   Users,
   Wallet,
   CheckCircle2,
-  PlayCircle,
   Zap,
 } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
-import './index-light.css';
-
-const heroStats = [
-  { value: '10M+', label: 'Engagement Delivered' },
-  { value: '99.8%', label: 'Success Rate' },
-  { value: '24/7', label: 'Auto Delivery' },
-];
-
-const platforms = ['Instagram', 'YouTube', 'TikTok', 'Twitter/X', 'Facebook', 'Telegram'];
-
-const features = [
-  {
-    icon: Clock3,
-    title: 'Organic Scheduler',
-    description: 'Smart pacing keeps delivery natural with smooth spread, variance control, and realistic timing.',
-    iconBg: 'bg-[hsl(164_72%_57%_/_.14)] text-[hsl(164_72%_38%)]',
-  },
-  {
-    icon: Shield,
-    title: 'Safe Delivery Logic',
-    description: 'Patterns are tuned to feel human, reduce spikes, and keep account activity looking clean.',
-    iconBg: 'bg-[hsl(271_82%_63%_/_.12)] text-[hsl(271_64%_48%)]',
-  },
-  {
-    icon: Globe,
-    title: 'Multi Provider Routing',
-    description: 'Orders can flow through multiple provider accounts for stronger stability and better fulfillment.',
-    iconBg: 'bg-[hsl(331_83%_62%_/_.12)] text-[hsl(331_72%_52%)]',
-  },
-  {
-    icon: Sparkles,
-    title: 'AI Delivery Intelligence',
-    description: 'Delivery speed adapts to the order pattern so the overall flow feels premium and believable.',
-    iconBg: 'bg-[hsl(46_96%_61%_/_.16)] text-[hsl(38_88%_42%)]',
-  },
-  {
-    icon: BarChart3,
-    title: 'Live Tracking',
-    description: 'Users can watch progress, history, and performance in one simple dashboard without confusion.',
-    iconBg: 'bg-[hsl(197_82%_60%_/_.14)] text-[hsl(197_76%_42%)]',
-  },
-  {
-    icon: Wallet,
-    title: 'Wallet Based Ordering',
-    description: 'No subscription friction — users just add funds, place orders, and keep the flow simple.',
-    iconBg: 'bg-[hsl(148_66%_52%_/_.12)] text-[hsl(148_62%_36%)]',
-  },
-];
-
-const steps = [
-  {
-    step: '01',
-    title: 'Create account',
-    description: 'Quick signup, no subscription barrier, straight access to the platform.',
-  },
-  {
-    step: '02',
-    title: 'Add funds & choose service',
-    description: 'Top up wallet, select a service, enter quantity, and place your order in a few clicks.',
-  },
-  {
-    step: '03',
-    title: 'Track growth in real time',
-    description: 'Follow order progress, delivery status, and history inside the dashboard.',
-  },
-];
-
-const proofItems = [
-  { label: '2,400+ Active Users' },
-  { label: '4.9/5 Rating' },
-];
 
 const Index = () => {
   return (
-    <main className="landing-shell overflow-x-hidden">
-      <div className="relative z-10 px-3 py-3 sm:px-4 sm:py-5">
-        <div className="landing-container landing-glass-nav rounded-[28px] px-4 py-4 sm:px-6 sm:py-5">
-          <div className="flex items-center justify-between gap-4">
-            <Link to="/" className="flex items-center gap-3 min-w-0">
-              <img src={logo} alt="OrganicSMM logo" className="h-11 w-11 rounded-2xl object-cover shadow-[0_14px_24px_hsl(331_83%_62%_/_0.16)]" />
-              <div className="min-w-0">
-                <p className="truncate text-lg font-black tracking-tight text-foreground">OrganicSMM</p>
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[hsl(331_83%_62%)]">Updated Version</p>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Link
-                to="/auth"
-                className="hidden sm:inline-flex items-center rounded-full px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[hsl(228_13%_45%)] transition-colors hover:text-foreground"
-              >
-                Login
-              </Link>
-              <Link to="/auth" className="landing-primary-btn text-xs uppercase tracking-[0.14em] sm:text-sm">
-                Get Started
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
+    <main className="min-h-screen bg-[#0b0b10] text-white overflow-x-hidden relative">
+      {/* Smooth ambient glows */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-pink-500/[0.08] blur-[200px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-fuchsia-600/[0.05] blur-[180px]" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] rounded-full bg-purple-600/[0.04] blur-[160px]" />
       </div>
 
-      <section className="landing-container grid items-center gap-14 px-3 pb-20 pt-8 sm:px-4 md:grid-cols-[1.02fr_0.98fr] md:pt-10 lg:gap-10 lg:pb-24">
-        <div className="text-center md:text-left">
-          <div className="landing-badge mb-8">
-            <span className="landing-badge-dot" />
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-[hsl(228_13%_45%)]">
-              Platform Updated • V3.0
-            </span>
+      {/* ─── NAV ─── */}
+      <nav className="relative z-50 mx-auto max-w-6xl px-5 py-5 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo} alt="OrganicSMM" className="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10" />
+          <div>
+            <p className="text-base font-extrabold tracking-tight">OrganicSMM</p>
+            <p className="text-[9px] font-bold uppercase tracking-[.22em] text-pink-400">Updated Version</p>
           </div>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Link to="/auth" className="hidden sm:block px-5 py-2.5 text-xs font-bold text-white/50 hover:text-white transition-colors">
+            Login
+          </Link>
+          <Link to="/auth" className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-pink-500 to-fuchsia-600 shadow-[0_8px_32px_rgba(236,72,153,.3)] hover:shadow-[0_12px_40px_rgba(236,72,153,.4)] transition-shadow">
+            Get Started <ArrowRight className="inline w-3.5 h-3.5 ml-1 -mt-px" />
+          </Link>
+        </div>
+      </nav>
 
-          <h1 className="landing-hero-title font-display font-black">
-            <span className="landing-word-soft">Grow</span>{' '}
-            <span className="landing-word-accent">Organic.</span>
-            <br />
-            <span className="landing-word-soft">Scale</span>{' '}
-            <span className="landing-word-accent">Smarter.</span>
-          </h1>
-
-          <p className="landing-copy mx-auto mt-7 max-w-xl text-base font-medium leading-8 md:mx-0 md:text-lg">
-            OrganicSMM is a premium growth platform for users who want a clean wallet-based ordering experience,
-            smarter delivery flow, and a website that feels modern, bright, and high trust.
-          </p>
-
-          <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap md:items-start">
-            <Link to="/auth" className="landing-primary-btn w-full sm:w-auto">
-              Start Growing Now
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link to="/services" className="landing-secondary-btn w-full sm:w-auto">
-              <Eye className="h-4 w-4" />
-              View Services
-            </Link>
-          </div>
-
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3 md:justify-start">
-            <div className="landing-proof-chip flex items-center gap-3 rounded-full px-4 py-3">
-              <div className="flex -space-x-2">
-                {['A', 'S', 'M', 'P'].map((letter, index) => (
-                  <div
-                    key={letter}
-                    className={[
-                      'flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-[11px] font-black text-white',
-                      index === 0 && 'bg-[hsl(331_83%_62%)]',
-                      index === 1 && 'bg-[hsl(271_82%_63%)]',
-                      index === 2 && 'bg-[hsl(46_96%_61%)] text-[hsl(234_28%_16%)]',
-                      index === 3 && 'bg-[hsl(164_72%_57%)] text-[hsl(234_28%_16%)]',
-                    ].filter(Boolean).join(' ')}
-                  >
-                    {letter}
-                  </div>
-                ))}
-              </div>
-              <span className="text-sm font-semibold text-[hsl(228_13%_45%)]">{proofItems[0].label}</span>
-            </div>
-
-            <div className="landing-proof-chip flex items-center gap-3 rounded-full px-4 py-3">
-              <div className="flex items-center gap-1 text-[hsl(46_96%_52%)]">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-              <span className="text-sm font-semibold text-[hsl(228_13%_45%)]">{proofItems[1].label}</span>
-            </div>
-          </div>
+      {/* ─── HERO ─── */}
+      <section className="relative z-10 mx-auto max-w-6xl px-5 pt-20 sm:pt-28 pb-24 text-center">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-white/[.08] bg-white/[.03] px-5 py-2 mb-10 backdrop-blur-md">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-60" />
+            <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
+          </span>
+          <span className="text-[11px] font-semibold text-white/50 tracking-wider">PLATFORM UPDATED • V3.0</span>
         </div>
 
-        <div className="landing-visual">
-          <div className="landing-blob landing-blob--main" />
-          <div className="landing-blob landing-blob--top" />
-          <div className="landing-blob landing-blob--side" />
+        <h1 className="text-[clamp(3rem,8vw,7.5rem)] font-black leading-[.9] tracking-[-.04em] mb-7" style={{ textShadow: '0 0 80px rgba(236,72,153,.15)' }}>
+          <span className="text-white">Grow </span>
+          <span className="bg-gradient-to-r from-pink-400 via-rose-400 to-fuchsia-500 bg-clip-text text-transparent">Organic.</span>
+          <br />
+          <span className="text-white">Scale </span>
+          <span className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">Smarter.</span>
+        </h1>
 
-          <div className="landing-floating-card landing-floating-card--top">
-            <span className="landing-icon-bubble bg-[hsl(164_72%_57%_/_0.18)] text-[hsl(164_72%_32%)]">
-              <CheckCircle2 className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-foreground">Safe Delivery</p>
-              <p className="text-xs font-medium text-[hsl(228_13%_45%)]">Human-like pacing enabled</p>
+        <p className="mx-auto max-w-lg text-base sm:text-lg text-white/40 leading-relaxed mb-10">
+          The premium social media growth engine that delivers <span className="text-pink-300 font-medium">real organic engagement</span> with delivery patterns indistinguishable from genuine activity.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+          <Link to="/auth" className="h-[52px] px-8 rounded-2xl text-sm font-bold bg-gradient-to-r from-pink-500 to-fuchsia-600 flex items-center gap-2 shadow-[0_16px_48px_rgba(236,72,153,.25)] hover:shadow-[0_20px_56px_rgba(236,72,153,.35)] transition-shadow">
+            Start Growing Now <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link to="/auth" className="h-[52px] px-8 rounded-2xl text-sm font-semibold text-white/60 hover:text-white border border-white/[.08] hover:border-white/[.15] bg-white/[.03] hover:bg-white/[.06] flex items-center gap-2 backdrop-blur-sm transition-all">
+            <Eye className="w-4 h-4" /> View Services
+          </Link>
+        </div>
+
+        {/* Social proof */}
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          <div className="flex items-center gap-3 bg-white/[.04] border border-white/[.06] rounded-full px-4 py-2.5 backdrop-blur-sm">
+            <div className="flex -space-x-2">
+              {['bg-pink-500','bg-purple-500','bg-amber-500','bg-emerald-500'].map((bg, i) => (
+                <div key={i} className={`w-7 h-7 rounded-full ${bg} border-2 border-[#0b0b10] flex items-center justify-center text-[10px] font-bold`}>
+                  {['A','S','R','M'][i]}
+                </div>
+              ))}
             </div>
+            <span className="text-xs text-white/40 font-medium">2,400+ Active Users</span>
           </div>
-
-          <div className="landing-floating-card landing-floating-card--mid">
-            <span className="landing-icon-bubble bg-[hsl(331_83%_62%_/_0.16)] text-[hsl(331_72%_48%)]">
-              <Zap className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-foreground">Fast Fulfillment</p>
-              <p className="text-xs font-medium text-[hsl(228_13%_45%)]">Multi-provider routing</p>
-            </div>
-          </div>
-
-          <div className="landing-floating-card landing-floating-card--bottom">
-            <span className="landing-icon-bubble bg-[hsl(46_96%_61%_/_0.18)] text-[hsl(38_88%_38%)]">
-              <TrendingUp className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-foreground">Live Results</p>
-              <p className="text-xs font-medium text-[hsl(228_13%_45%)]">Track every order easily</p>
-            </div>
-          </div>
-
-          <div className="landing-device">
-            <div className="landing-device-screen">
-              <div className="landing-screen-bar" />
-
-              <div className="landing-screen-card landing-screen-card--hero mb-4 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[hsl(228_13%_45%)]">Growth Dashboard</p>
-                  <h2 className="mt-2 text-2xl font-black tracking-tight text-foreground">Updated Version</h2>
-                </div>
-                <span className="rounded-full bg-[hsl(164_72%_57%_/_0.16)] px-3 py-2 text-xs font-bold text-[hsl(164_72%_32%)]">
-                  Active
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="landing-screen-card rounded-[1.25rem] p-4">
-                  <p className="text-xs font-semibold text-[hsl(228_13%_45%)]">Wallet balance</p>
-                  <p className="mt-2 text-2xl font-black tracking-tight text-foreground">$500</p>
-                  <p className="mt-2 text-xs font-medium text-[hsl(164_72%_32%)]">Ready for ordering</p>
-                </div>
-                <div className="landing-screen-card rounded-[1.25rem] p-4">
-                  <p className="text-xs font-semibold text-[hsl(228_13%_45%)]">Order status</p>
-                  <p className="mt-2 text-2xl font-black tracking-tight text-foreground">Live</p>
-                  <p className="mt-2 text-xs font-medium text-[hsl(331_72%_48%)]">Tracking enabled</p>
-                </div>
-              </div>
-
-              <div className="landing-screen-card mt-4 rounded-[1.35rem] p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Performance</p>
-                    <p className="text-xs font-medium text-[hsl(228_13%_45%)]">Natural organic curve</p>
-                  </div>
-                  <PlayCircle className="h-5 w-5 text-[hsl(331_72%_52%)]" />
-                </div>
-                <div className="landing-mini-chart" />
-              </div>
-            </div>
+          <div className="flex items-center gap-1.5 bg-white/[.04] border border-white/[.06] rounded-full px-4 py-2.5 backdrop-blur-sm">
+            {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />)}
+            <span className="text-xs text-white/40 font-medium ml-1.5">4.9/5 Rating</span>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[hsl(26_28%_87%)]/80 bg-white/50 py-5 backdrop-blur-sm">
-        <div className="landing-container grid grid-cols-1 gap-3 px-3 sm:grid-cols-3 sm:px-4">
-          {heroStats.map((stat) => (
-            <div key={stat.label} className="landing-surface-card rounded-[1.7rem] px-6 py-6 text-center">
-              <p className="text-4xl font-black tracking-[-0.05em] text-foreground">{stat.value}</p>
-              <p className="mt-2 text-xs font-extrabold uppercase tracking-[0.2em] text-[hsl(228_13%_45%)]">{stat.label}</p>
+      {/* ─── STATS ─── */}
+      <section className="relative z-10 mx-auto max-w-5xl px-5 pb-20">
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { v: '10M+', l: 'Engagement Delivered' },
+            { v: '99.8%', l: 'Success Rate' },
+            { v: '24/7', l: 'Auto Delivery' },
+          ].map((s) => (
+            <div key={s.l} className="rounded-2xl border border-white/[.06] bg-white/[.03] backdrop-blur-sm py-8 text-center hover:border-pink-500/20 hover:bg-white/[.05] transition-all">
+              <p className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">{s.v}</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[.18em] text-white/30 mt-2">{s.l}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="py-12 sm:py-16">
-        <div className="landing-container px-3 sm:px-4">
-          <p className="text-center text-xs font-black uppercase tracking-[0.32em] text-[hsl(228_13%_45%)]">Works with every major platform</p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            {platforms.map((platform) => (
-              <div key={platform} className="landing-platform-chip rounded-full px-5 py-3 text-sm font-bold text-[hsl(234_28%_16%)]">
-                {platform}
+      {/* ─── PLATFORMS ─── */}
+      <section className="relative z-10 border-y border-white/[.05] py-12">
+        <div className="mx-auto max-w-5xl px-5">
+          <p className="text-center text-[10px] font-bold uppercase tracking-[.3em] text-white/20 mb-6">Works with every major platform</p>
+          <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap">
+            {['Instagram', 'YouTube', 'TikTok', 'Twitter/X', 'Facebook', 'Telegram'].map((p) => (
+              <span key={p} className="text-sm font-bold text-white/25 hover:text-white/50 transition-colors">{p}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FEATURES ─── */}
+      <section className="relative z-10 py-20 px-5">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-[.25em] text-pink-400/70 mb-3">Why OrganicSMM</p>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
+              Built for <span className="text-pink-400">Performance</span>
+            </h2>
+            <p className="text-sm text-white/30 mt-3 max-w-md mx-auto">Every feature engineered to deliver genuine, algorithm-safe growth.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: Clock3, title: 'Organic Scheduler', desc: 'AI-driven variable speed delivery that mirrors real viral surge patterns.', color: 'text-pink-400 bg-pink-500/10' },
+              { icon: Shield, title: 'Stealth Protocol', desc: 'Zero-footprint delivery with residential proxy rotation and encrypted trails.', color: 'text-emerald-400 bg-emerald-500/10' },
+              { icon: Globe, title: 'Multi-Provider', desc: 'Intelligent failover across multiple providers for 99.9% uptime.', color: 'text-blue-400 bg-blue-500/10' },
+              { icon: Sparkles, title: 'AI Autopilot', desc: 'Content-aware delivery that adapts speed based on engagement signals.', color: 'text-amber-400 bg-amber-500/10' },
+              { icon: Zap, title: 'Anti-Detection', desc: 'Randomized variance, peak-hour boosting, and human behavior simulation.', color: 'text-purple-400 bg-purple-500/10' },
+              { icon: BarChart3, title: 'Live Analytics', desc: 'Real-time dashboards tracking every order, run, and provider response.', color: 'text-cyan-400 bg-cyan-500/10' },
+            ].map((f) => (
+              <div key={f.title} className="group rounded-2xl border border-white/[.06] bg-white/[.02] backdrop-blur-sm p-7 hover:border-pink-500/15 hover:bg-white/[.04] transition-all">
+                <div className={`w-12 h-12 rounded-xl ${f.color} flex items-center justify-center mb-5`}>
+                  <f.icon className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                <p className="text-sm text-white/30 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-18 sm:py-20">
-        <div className="landing-container px-3 sm:px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-[hsl(331_83%_62%)]">Why OrganicSMM</p>
-            <h2 className="mt-4 text-4xl font-black tracking-[-0.05em] text-foreground sm:text-5xl">
-              Bright, clean and built to convert
-            </h2>
-            <p className="mt-4 text-base font-medium leading-8 text-[hsl(228_13%_45%)]">
-              The platform already has the core system — this landing page now explains it in a lighter, more premium,
-              trust-building way.
-            </p>
+      {/* ─── HOW IT WORKS ─── */}
+      <section className="relative z-10 py-20 px-5">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-[.25em] text-pink-400/70 mb-3">Simple Process</p>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Three Steps to Growth</h2>
           </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div key={feature.title} className="landing-feature-card rounded-[2rem] p-7">
-                  <div className={`mb-5 inline-flex h-14 w-14 items-center justify-center rounded-[1.25rem] ${feature.iconBg}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-black tracking-tight text-foreground">{feature.title}</h3>
-                  <p className="mt-3 text-sm font-medium leading-7 text-[hsl(228_13%_45%)]">{feature.description}</p>
+          <div className="space-y-4">
+            {[
+              { n: '01', title: 'Create Account', desc: 'Sign up in seconds. No subscription needed — add funds and go.' },
+              { n: '02', title: 'Choose Service', desc: 'Pick your platform, engagement type, quantity, and delivery speed.' },
+              { n: '03', title: 'Watch It Grow', desc: 'Our AI handles everything. Track real-time progress on your dashboard.' },
+            ].map((s) => (
+              <div key={s.n} className="flex items-start gap-5 rounded-2xl border border-white/[.06] bg-white/[.02] backdrop-blur-sm p-6 hover:border-pink-500/15 hover:bg-white/[.04] transition-all">
+                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 flex items-center justify-center text-sm font-black shadow-[0_8px_24px_rgba(236,72,153,.2)]">
+                  {s.n}
                 </div>
-              );
-            })}
+                <div>
+                  <h3 className="text-lg font-bold mb-1">{s.title}</h3>
+                  <p className="text-sm text-white/30 leading-relaxed">{s.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="py-18 sm:py-20">
-        <div className="landing-container px-3 sm:px-4">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-[hsl(164_72%_38%)]">Simple process</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.05em] text-foreground sm:text-5xl">
-                Wallet based ordering without confusion
+      {/* ─── CTA ─── */}
+      <section className="relative z-10 py-20 px-5">
+        <div className="mx-auto max-w-3xl">
+          <div className="relative rounded-3xl border border-pink-500/10 bg-gradient-to-b from-pink-500/[.05] via-fuchsia-500/[.03] to-transparent p-10 sm:p-16 text-center overflow-hidden backdrop-blur-sm">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-pink-500/[.08] blur-[140px] rounded-full pointer-events-none" />
+            <div className="relative">
+              <img src={logo} alt="" className="w-14 h-14 rounded-xl object-cover mx-auto mb-6 ring-1 ring-white/10" />
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">
+                Ready to <span className="text-pink-400">Dominate?</span>
               </h2>
-              <p className="mt-4 text-base font-medium leading-8 text-[hsl(228_13%_45%)]">
-                Signup, add funds, place the order, and track everything — no subscription wall, no cluttered flow.
+              <p className="text-sm text-white/30 mb-8 max-w-sm mx-auto">
+                Join thousands growing organically. No subscriptions, no commitments — just results.
               </p>
-            </div>
-
-            <div className="grid gap-4">
-              {steps.map((step) => (
-                <div key={step.step} className="landing-step-card rounded-[1.8rem] p-6 sm:p-7">
-                  <div className="flex items-start gap-5">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-[hsl(331_83%_62%)] to-[hsl(271_82%_63%)] text-base font-black text-white shadow-[0_18px_28px_hsl(331_83%_62%_/_0.2)]">
-                      {step.step}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black tracking-tight text-foreground">{step.title}</h3>
-                      <p className="mt-2 text-sm font-medium leading-7 text-[hsl(228_13%_45%)]">{step.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="pb-20 pt-6 sm:pb-24">
-        <div className="landing-container px-3 sm:px-4">
-          <div className="landing-cta-panel rounded-[2.4rem] px-6 py-12 text-center sm:px-12 sm:py-16">
-            <img src={logo} alt="OrganicSMM logo" className="mx-auto h-16 w-16 rounded-[1.4rem] object-cover shadow-[0_20px_34px_hsl(331_83%_62%_/_0.16)]" />
-            <p className="mt-6 text-xs font-black uppercase tracking-[0.3em] text-[hsl(331_83%_62%)]">Premium updated version</p>
-            <h2 className="mx-auto mt-4 max-w-2xl text-4xl font-black tracking-[-0.05em] text-foreground sm:text-5xl">
-              A light premium UI that feels polished, modern and human-made
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-8 text-[hsl(228_13%_45%)]">
-              OrganicSMM is now positioned like a real polished product — bright visuals, softer depth, strong CTAs,
-              and a cleaner first impression.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to="/auth" className="landing-primary-btn w-full sm:w-auto">
-                Create Free Account
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link to="/services" className="landing-secondary-btn w-full sm:w-auto">
-                Explore Services
+              <Link to="/auth" className="inline-flex h-[52px] px-10 rounded-2xl text-sm font-bold bg-gradient-to-r from-pink-500 to-fuchsia-600 items-center gap-2 shadow-[0_16px_48px_rgba(236,72,153,.25)] hover:shadow-[0_20px_56px_rgba(236,72,153,.35)] transition-shadow">
+                Create Free Account <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-[hsl(26_28%_87%)]/90 bg-white/50 py-8 backdrop-blur-sm">
-        <div className="landing-container flex flex-col items-center justify-between gap-4 px-3 text-center sm:flex-row sm:px-4 sm:text-left">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="OrganicSMM logo" className="h-10 w-10 rounded-2xl object-cover" />
-            <div>
-              <p className="text-sm font-black text-foreground">OrganicSMM</p>
-              <p className="text-xs font-semibold text-[hsl(228_13%_45%)]">Updated Version</p>
-            </div>
+      {/* ─── FOOTER ─── */}
+      <footer className="relative z-10 border-t border-white/[.05] py-8">
+        <div className="mx-auto max-w-6xl px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="" className="w-7 h-7 rounded-lg object-cover" />
+            <span className="text-sm font-bold text-white/30">OrganicSMM</span>
           </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-semibold text-[hsl(228_13%_45%)]">
-            <Link to="/terms" className="transition-colors hover:text-foreground">Terms</Link>
-            <Link to="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
-            <Link to="/refund" className="transition-colors hover:text-foreground">Refund</Link>
+          <div className="flex gap-5 text-xs text-white/20">
+            <Link to="/terms" className="hover:text-white/40 transition-colors">Terms</Link>
+            <Link to="/privacy" className="hover:text-white/40 transition-colors">Privacy</Link>
+            <Link to="/refund" className="hover:text-white/40 transition-colors">Refund</Link>
           </div>
-
-          <p className="text-xs font-semibold text-[hsl(228_13%_45%)]">© {new Date().getFullYear()} OrganicSMM</p>
+          <p className="text-[10px] text-white/15">© {new Date().getFullYear()} OrganicSMM</p>
         </div>
       </footer>
     </main>
