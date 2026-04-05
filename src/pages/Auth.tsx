@@ -4,13 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Mail, Lock, User, Loader2, ArrowLeft, Shield, Zap,
-  Activity, Shuffle, Clock, Moon, Timer, BarChart3,
-  Eye, EyeOff, KeyRound, Fingerprint, Globe, CheckCircle2, Star, Target, Users
-} from 'lucide-react';
+import { Mail, Lock, User, Loader2, ArrowLeft, Shield, Zap, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import logo from '@/assets/logo.jpg';
+import heroVisual from '@/assets/hero-visual.jpg';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Invalid email address'),
@@ -22,13 +20,6 @@ const signupSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
 });
-
-const features = [
-  { icon: Activity, title: 'S-Curve Delivery', desc: 'Mimics natural viral growth patterns', bg: 'bg-[#ec4899]/10', color: 'text-[#ec4899]' },
-  { icon: Shuffle, title: 'Random Variance', desc: 'Unpredictable quantities like real users', bg: 'bg-[#ec4899]/10', color: 'text-[#ec4899]' },
-  { icon: Clock, title: 'Peak Hour Boost', desc: 'Automatic 1.5× boost during IST peaks', bg: 'bg-[#ec4899]/10', color: 'text-[#ec4899]' },
-  { icon: Timer, title: 'Random Jitter', desc: 'Execution times vary — bot-proof', bg: 'bg-[#f59e0b]/10', color: 'text-[#f59e0b]' },
-];
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -46,9 +37,7 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && user) {
-      navigate('/engagement-order');
-    }
+    if (!isLoading && user) navigate('/engagement-order');
   }, [user, isLoading, navigate]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -57,34 +46,18 @@ export default function Auth() {
     try {
       const trimmedEmail = email.trim().toLowerCase();
       if (!trimmedEmail || !z.string().email().safeParse(trimmedEmail).success) {
-        setError('Please enter a valid email address');
-        setIsSubmitting(false); return;
+        setError('Please enter a valid email address'); setIsSubmitting(false); return;
       }
-      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
-      if (error) setError(error.message || 'Failed to send reset email.');
-      else setSuccessMessage('Password reset email sent! Check your inbox.');
-    } catch { setError('Something went wrong. Please try again.'); }
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, { redirectTo: `${window.location.origin}/auth` });
+      if (error) setError(error.message); else setSuccessMessage('Password reset email sent! Check your inbox.');
+    } catch { setError('Something went wrong.'); }
     finally { setIsSubmitting(false); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); setSuccessMessage(''); setIsSubmitting(true);
-    console.log('--- Auth Submit Started ---');
-    
-    const timeoutId = setTimeout(() => {
-      setIsSubmitting(current => {
-        if (current) {
-          setError('Connection Timeout. Request is taking too long.');
-          console.error('--- Auth Timeout Reached ---');
-          return false;
-        }
-        return false;
-      });
-    }, 20000);
-
+    const timeoutId = setTimeout(() => { setIsSubmitting(c => { if (c) { setError('Connection timeout.'); return false; } return false; }); }, 20000);
     try {
       if (isLogin) {
         const v = loginSchema.safeParse({ email, password });
@@ -92,15 +65,10 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) {
           const msg = error.message.toLowerCase();
-          if (msg.includes('invalid login credentials')) {
-            setError('Access Denied: Incorrect Key.');
-          } else if (msg.includes('email not confirmed')) {
-            setError('Terminal not verified. Check your inbox.');
-          } else if (msg.includes('rate limit')) {
-            setError('Security Lock: Try again in 5 mins.');
-          } else {
-            setError('Login Failed: Authorization Rejected.');
-          }
+          if (msg.includes('invalid login credentials')) setError('Incorrect email or password.');
+          else if (msg.includes('email not confirmed')) setError('Please verify your email first.');
+          else if (msg.includes('rate limit')) setError('Too many attempts. Try again in 5 mins.');
+          else setError('Login failed.');
           setIsSubmitting(false); return;
         }
         navigate('/engagement-order', { replace: true });
@@ -110,277 +78,143 @@ export default function Auth() {
         const { error } = await signUp(email, password, fullName);
         if (error) {
           const msg = error.message.toLowerCase();
-          if (msg.includes('already registered')) setError('This terminal email is already registered.');
-          else if (msg.includes('rate limit')) setError('Too many attempts. Please wait 5 minutes.');
+          if (msg.includes('already registered')) setError('This email is already registered.');
+          else if (msg.includes('rate limit')) setError('Too many attempts. Wait 5 minutes.');
           else setError(error.message || 'Signup failed.');
           setIsSubmitting(false); clearTimeout(timeoutId); return;
         }
-        
-        console.log('--- Signup Success ---');
-        // Since Email Confirmation is now OFF in Supabase, 
-        // the user is often logged in immediately or can just switch to login.
-        setSuccessMessage('Account Created Successfully!');
+        setSuccessMessage('Account created successfully!');
         setTimeout(() => setIsLogin(true), 2000);
       }
     } catch (err: any) {
-      if (!err?.message?.includes('abort')) {
-        const msg = err?.message?.toLowerCase() || '';
-        if (msg.includes('rate limit')) {
-          setError('Security limit reached. Please wait 5 minutes before trying again.');
-        } else {
-          setError('Authorization terminal error. Please refresh.');
-        }
-      }
-    } finally { 
-      setIsSubmitting(false); 
-      clearTimeout(timeoutId);
-      console.log('--- Auth Handled ---');
-    }
+      if (!err?.message?.includes('abort')) setError('Something went wrong. Please try again.');
+    } finally { setIsSubmitting(false); clearTimeout(timeoutId); }
   };
 
-  const reset = () => { setError(''); setSuccessMessage(''); setShowVerifyEmail(false); };
+  const inputClass = "h-12 rounded-xl border-[#e5e5e5] bg-white focus:border-[#1a1a2e] focus:ring-1 focus:ring-[#1a1a2e] text-[#1a1a2e] font-medium px-4 placeholder:text-[#bbb] transition-all";
 
   return (
-    <div className="min-h-screen bg-[#04060c] flex items-center justify-center p-4 md:p-10 font-sans selection:bg-[#ec4899]/40 overflow-hidden relative">
-
-      {/* ── DYNAMIC 3D BACKGROUND ── */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}} />
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none bg-[#08080a]">
-        <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-[#ec4899]/20 blur-[150px] rounded-full" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#2563eb]/10 blur-[120px] rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03]"
-          style={{ backgroundImage: 'linear-gradient(#ec4899 1px, transparent 1px), linear-gradient(90deg, #ec4899 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+    <div className="min-h-screen flex">
+      {/* Left — visual panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center">
+        <img src={heroVisual} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(88,28,135,.88), rgba(157,23,77,.78), rgba(234,88,12,.65))' }} />
+        <div className="relative z-10 max-w-md px-10 text-white">
+          <img src={logo} alt="OrganicSMM" className="w-14 h-14 rounded-xl object-cover mb-8 shadow-xl" />
+          <h2 className="text-4xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
+            Grow your social media the right way.
+          </h2>
+          <p className="text-white/60 text-[15px] leading-relaxed">
+            Real organic engagement with natural delivery patterns. Join 2,400+ creators and businesses.
+          </p>
+        </div>
       </div>
 
-      {/* ── MAIN AUTH CONSOLE CARD ── */}
-      <div className="w-full max-w-[480px] relative z-10 px-4">
+      {/* Right — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12" style={{ background: '#fafaf8' }}>
+        <div className="w-full max-w-[400px]">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+            <img src={logo} alt="OrganicSMM" className="w-9 h-9 rounded-lg object-cover" />
+            <span className="text-[15px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+          </div>
 
-        {/* Logo Section */}
-        <div className="flex flex-col items-center mb-10 text-center">
-          <img src="/og-image.jpg" alt="OrganicSMM" className="w-20 h-20 rounded-[2.5rem] object-cover mb-6 shadow-lg shadow-pink-500/20 border-2 border-pink-500/20" />
-          <h1 className="text-4xl font-[1000] text-white tracking-tighter mb-1">OrganicSMM</h1>
-          <p className="text-[11px] font-black uppercase tracking-[0.5em] text-pink-400 opacity-80">AUTHENTICATION</p>
-        </div>
+          <Link to="/" className="inline-flex items-center gap-1.5 text-[12px] font-medium mb-8" style={{ color: '#999' }}>
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to home
+          </Link>
 
-        {/* The Glass Card Container */}
-        <div className="relative">
-          <div className="bg-[#0a0f1c]/90 backdrop-blur-3xl border border-white/10 rounded-[3.5rem] p-8 md:p-14 relative overflow-hidden ring-1 ring-white/5">
+          <h1 className="text-2xl font-extrabold tracking-tight mb-1" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui, sans-serif" }}>
+            {isForgotPassword ? 'Reset password' : isLogin ? 'Welcome back' : 'Create account'}
+          </h1>
+          <p className="text-[14px] mb-8" style={{ color: '#999' }}>
+            {isForgotPassword ? 'Enter your email to receive a reset link.' : isLogin ? 'Sign in to your account.' : 'Get started for free.'}
+          </p>
 
-            {/* Upper Light Line */}
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-60" />
-
-            {/* Home Redirect */}
-            <Link to="/" className="absolute top-8 right-10 text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-[#ec4899] transition-none flex items-center gap-2 group">
-              <ArrowLeft className="w-4 h-4 transition-none group-hover:-translate-x-1" /> RETURN
-            </Link>
-
-            <div className="mt-4">
-              <h2 className="text-2xl font-[1000] text-white mb-2 leading-none">
-                {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back.' : 'Create Account.'}
-              </h2>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#ec4899]/60 mb-10">
-                {isForgotPassword
-                  ? 'ENTER EMAIL TO CONTINUE'
-                  : isLogin
-                    ? 'SIGN IN TO CONTINUE'
-                    : 'JOIN THE PLATFORM'}
-              </p>
-
-              {/* ──── Verification Screen ──── */}
-              {showVerifyEmail ? (
-                <div className="text-center py-6">
-                  <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-[3rem] flex items-center justify-center mx-auto mb-8">
-                    <Mail className="h-10 w-10 text-[#ec4899]" />
+          {showVerifyEmail ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: '#f0fdf4' }}>
+                <Mail className="w-7 h-7" style={{ color: '#22c55e' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-2" style={{ color: '#1a1a2e' }}>Check your inbox</h3>
+              <p className="text-[13px] mb-2" style={{ color: '#888' }}>Verification link sent to:</p>
+              <p className="text-[13px] font-semibold mb-6" style={{ color: '#1a1a2e' }}>{email}</p>
+              <button onClick={() => { setShowVerifyEmail(false); setIsLogin(true); }} className="text-[13px] font-semibold" style={{ color: '#9333ea' }}>
+                ← Back to login
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="space-y-4">
+              {isForgotPassword ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-[12px] font-semibold mb-1.5 block" style={{ color: '#555', textTransform: 'none', letterSpacing: 'normal' }}>Email</Label>
+                    <Input type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
                   </div>
-                  <h3 className="text-2xl font-[1000] text-white mb-4 tracking-tight">Check Your Inbox</h3>
-                  <p className="text-[11px] font-bold text-white/30 mb-2 max-w-[240px] mx-auto leading-relaxed border-t border-white/5 pt-6">
-                    A verification link has been sent to your email address.
-                  </p>
-                  <p className="text-[11px] font-bold text-[#ec4899]/80 mb-8 max-w-[240px] mx-auto leading-relaxed">
-                    Note: If you don't see it, please check your <span className="text-white">spam</span> or <span className="text-white">junk</span> folder.
-                  </p>
-                  <div className="bg-[#ec4899]/5 p-5 rounded-2xl border border-[#ec4899]/20 mb-10 ring-1 ring-[#ec4899]/10">
-                    <span className="text-xs font-black text-[#ec4899] tracking-tight">{email}</span>
-                  </div>
-                  <button type="button" onClick={() => { setShowVerifyEmail(false); setIsLogin(true); reset(); }}
-                    className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ec4899] hover:text-white transition-none underline underline-offset-8 decoration-2 decoration-[#ec4899]/40">
-                    ← BACK TO GATEWAY
+                  {error && <p className="text-[13px] font-medium" style={{ color: '#ef4444' }}>{error}</p>}
+                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#22c55e' }}>{successMessage}</p>}
+                  <button type="submit" disabled={isSubmitting} className="w-full h-11 rounded-xl text-[13px] font-semibold text-white flex items-center justify-center gap-2" style={{ background: '#1a1a2e' }}>
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Send reset link <ArrowRight className="w-3.5 h-3.5" /></>}
+                  </button>
+                  <button type="button" onClick={() => setIsForgotPassword(false)} className="w-full text-center text-[13px] font-medium" style={{ color: '#999' }}>
+                    Back to login
                   </button>
                 </div>
               ) : (
-                <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="space-y-6">
-
-                  {isForgotPassword ? (
-                    /* ───── Forgot Password ───── */
-                    <div className="space-y-6">
-                      <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">EMAIL ADDRESS</Label>
-                        <Input
-                          type="email"
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          className="h-14 rounded-2xl border-white/5 bg-white/5 focus:bg-white/10 focus:border-[#ec4899]/50 text-white font-bold px-6 border-2 transition-none"
-                        />
-                      </div>
-
-                      {error && (
-                        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex gap-3 items-center">
-                          <Shield className="h-4 w-4 text-rose-500 shrink-0" />
-                          <p className="text-xs font-bold text-rose-200">{error}</p>
-                        </div>
-                      )}
-
-                      {successMessage && (
-                        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex gap-3 items-center">
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                          <p className="text-xs font-bold text-emerald-200">{successMessage}</p>
-                        </div>
-                      )}
-
-                      <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-2xl bg-[#ec4899] hover:bg-[#a855f7] text-white font-black text-sm uppercase tracking-widest transition-none disabled:opacity-80">
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-2">
-                            <Loader2 className="h-5 w-5 animate-spin" style={{ animation: 'spin 1s linear infinite' }} /> 
-                            SENDING...
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            SEND RESET LINK <ArrowLeft className="w-4 h-4 rotate-180" />
-                          </span>
-                        )}
-                      </Button>
-
-                      <button type="button" onClick={() => setIsForgotPassword(false)} className="w-full text-center text-[10px] font-[1000] uppercase tracking-[0.2em] text-white/20 hover:text-white transition-none">
-                        BACK TO LOGIN
-                      </button>
-                    </div>
-                  ) : (
-                    /* ───── Login / Signup ───── */
-                    <div className="space-y-6">
-
-                      {!isLogin && (
-                        <div className="space-y-3">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">FULL NAME</Label>
-                          <Input
-                            placeholder="John Doe"
-                            value={fullName}
-                            onChange={e => setFullName(e.target.value)}
-                            className="h-14 rounded-2xl border-white/5 bg-white/5 focus:bg-white/10 focus:border-[#ec4899]/50 text-white font-bold px-6 border-2 transition-none placeholder:text-white/10"
-                          />
-                        </div>
-                      )}
-
-                      <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">EMAIL ADDRESS</Label>
-                        <Input
-                          type="email"
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          className="h-14 rounded-2xl border-white/5 bg-white/5 focus:bg-white/10 focus:border-[#ec4899]/50 text-white font-bold px-6 border-2 transition-none placeholder:text-white/10"
-                        />
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between px-1">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-white/30">PASSWORD</Label>
-                          {isLogin && (
-                            <button type="button" onClick={() => setIsForgotPassword(true)} className="text-[9px] font-black uppercase tracking-widest text-[#ec4899]/40 hover:text-[#ec4899] transition-none">
-                              FORGOT PASSWORD?
-                            </button>
-                          )}
-                        </div>
-                        <div className="relative group/input">
-                          <Input
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            className="h-14 rounded-2xl border-white/5 bg-white/5 focus:bg-white/10 focus:border-[#ec4899]/80 text-white font-bold px-6 border-2 transition-none placeholder:text-white/5 pr-14"
-                          />
-                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#ec4899] transition-none">
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      {error && (
-                        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex gap-3 items-center">
-                          <Shield className="h-4 w-4 text-rose-500 shrink-0" />
-                          <p className="text-[11px] font-bold text-rose-200 leading-tight">{error}</p>
-                        </div>
-                      )}
-
-                      <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-[1.25rem] bg-white text-black hover:bg-white/95 font-black text-sm uppercase tracking-[0.3em] transition-none border-b-4 border-zinc-300 disabled:opacity-90 disabled:bg-zinc-200">
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-2 text-zinc-600">
-                            <Loader2 className="h-5 w-5 animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-                            {isLogin ? 'AUTHENTICATING...' : 'CREATING ACCOUNT...'}
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            {isLogin ? 'SIGN IN' : 'SIGN UP'}
-                            <Zap className="w-4 h-4 fill-current" />
-                          </span>
-                        )}
-                      </Button>
-
-                      <div className="pt-4 text-center">
-                        <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-[10px] font-bold text-white/20 tracking-widest uppercase">
-                          {isLogin ? "Don't have an account? " : 'Already have an account? '}
-                          <span className="text-[#ec4899] font-black ml-1 border-b border-[#ec4899]/30 hover:text-white transition-colors">{isLogin ? 'SIGN UP' : 'SIGN IN'}</span>
-                        </button>
-                      </div>
+                <div className="space-y-4">
+                  {!isLogin && (
+                    <div>
+                      <Label className="text-[12px] font-semibold mb-1.5 block" style={{ color: '#555', textTransform: 'none', letterSpacing: 'normal' }}>Full name</Label>
+                      <Input placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} className={inputClass} />
                     </div>
                   )}
-                </form>
+                  <div>
+                    <Label className="text-[12px] font-semibold mb-1.5 block" style={{ color: '#555', textTransform: 'none', letterSpacing: 'normal' }}>Email</Label>
+                    <Input type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label className="text-[12px] font-semibold" style={{ color: '#555', textTransform: 'none', letterSpacing: 'normal' }}>Password</Label>
+                      {isLogin && (
+                        <button type="button" onClick={() => setIsForgotPassword(true)} className="text-[11px] font-medium" style={{ color: '#9333ea' }}>
+                          Forgot password?
+                        </button>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className={`${inputClass} pr-11`} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2" style={{ color: '#bbb' }}>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && <p className="text-[13px] font-medium" style={{ color: '#ef4444' }}>{error}</p>}
+                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#22c55e' }}>{successMessage}</p>}
+
+                  <button type="submit" disabled={isSubmitting} className="w-full h-11 rounded-xl text-[13px] font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-70" style={{ background: '#1a1a2e' }}>
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{isLogin ? 'Sign in' : 'Create account'} <ArrowRight className="w-3.5 h-3.5" /></>}
+                  </button>
+
+                  <p className="text-center text-[13px]" style={{ color: '#999' }}>
+                    {isLogin ? "Don't have an account? " : 'Already have an account? '}
+                    <button type="button" onClick={() => { setIsLogin(!isLogin); setError(''); setSuccessMessage(''); }} className="font-semibold" style={{ color: '#9333ea' }}>
+                      {isLogin ? 'Sign up' : 'Sign in'}
+                    </button>
+                  </p>
+                </div>
               )}
-            </div>
-          </div>
-        </div>
+            </form>
+          )}
 
-        {/* Bottom Trust Indicators */}
-        <div className="mt-10 flex items-center justify-center gap-8 opacity-30">
-          <div className="flex items-center gap-2">
-            <Shield className="h-3 w-3 text-white" />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white">ENCRYPTED</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Fingerprint className="h-3 w-3 text-white" />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white">BIO-SCAN</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Globe className="h-3 w-3 text-white" />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white">NETWORK</span>
-          </div>
-        </div>
-
-        {/* Telegram Channel Link */}
-        <div className="mt-12 group">
-          <a
-            href="https://t.me/organicsmm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#ec4899]/10 hover:border-[#ec4899]/30 transition-all duration-300 group/link"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#0088cc]/20 flex items-center justify-center border border-[#0088cc]/30 shadow-inner group-hover/link:bg-[#0088cc]/30 transition-all">
-                <svg className="w-5 h-5 text-[#0088cc] fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.03-.78 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.61.8-1.88 1.77-1.88.21 0 .69.05.99.23.32.19.43.46.46.72.02.16.01.32-.01.48z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ec4899] mb-0.5">Community Gateway</p>
-                <p className="text-sm font-bold text-white group-hover/link:text-[#ec4899] transition-colors">Join Official Telegram</p>
-              </div>
+          {/* Telegram */}
+          <a href="https://t.me/organicsmm" target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center gap-3 p-3.5 rounded-xl transition-colors" style={{ border: '1px solid rgba(0,0,0,.06)', background: 'white' }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#0088cc15' }}>
+              <svg className="w-4 h-4 fill-[#0088cc]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.03-.78 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.61.8-1.88 1.77-1.88.21 0 .69.05.99.23.32.19.43.46.46.72.02.16.01.32-.01.48z" /></svg>
             </div>
-            <ArrowLeft className="w-5 h-5 text-white/20 rotate-180 group-hover/link:text-[#ec4899] group-hover/link:translate-x-1 transition-all" />
+            <div>
+              <p className="text-[12px] font-semibold" style={{ color: '#1a1a2e' }}>Join our Telegram</p>
+              <p className="text-[11px]" style={{ color: '#999' }}>Updates & support</p>
+            </div>
           </a>
         </div>
       </div>
