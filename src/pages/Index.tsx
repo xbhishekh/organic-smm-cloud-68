@@ -33,14 +33,20 @@ const Index = () => {
       {/* ═══ HERO ═══ */}
       <section className="pt-16 sm:pt-24 pb-10 text-center px-6">
         <div className="max-w-[800px] mx-auto">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-4" style={{ background: 'rgba(236,72,153,.08)', border: '1px solid rgba(236,72,153,.15)' }}>
+          {/* Updated Version Badge - stylish */}
+          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-5" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.1), rgba(219,39,119,.06))', border: '1px solid rgba(236,72,153,.18)', boxShadow: '0 2px 12px rgba(236,72,153,.08)' }}>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ec4899' }}></span>
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#ec4899' }}></span>
+            </span>
+            <span className="text-[11.5px] font-bold uppercase tracking-widest" style={{ color: '#db2777' }}>v2.0 Updated</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(236,72,153,.12)', color: '#be185d' }}>NEW</span>
+          </div>
+
+          {/* AI Badge */}
+          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-10" style={{ background: 'rgba(236,72,153,.08)', border: '1px solid rgba(236,72,153,.15)' }}>
             <Zap className="w-4 h-4" style={{ color: '#ec4899' }} />
             <span className="text-[13px] font-semibold" style={{ color: '#be185d' }}>World's First AI-Organic Panel</span>
-          </div>
-          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full mb-10" style={{ background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.15)' }}>
-            <Activity className="w-3 h-3" style={{ color: '#10b981' }} />
-            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#059669' }}>Updated Version 2.0 — Now Live</span>
           </div>
 
           <h1 className="text-[clamp(2.4rem,6vw,4.2rem)] font-black leading-[1.08] tracking-[-0.03em] mb-6" style={{ color: '#1a1a2e', fontFamily: "'Outfit', 'Inter', system-ui, sans-serif" }}>
