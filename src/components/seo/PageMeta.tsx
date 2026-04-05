@@ -7,9 +7,9 @@ interface PageMetaProps {
   noIndex?: boolean;
 }
 
-const DEFAULT_DESCRIPTION = 'Whopautopailot - Revolutionary organic social media growth platform. Get natural engagement with variable delivery patterns. 100% safe for your accounts.';
-const SITE_NAME = 'Whopautopailot';
-const BASE_URL = 'https://whopautopailot.pro';
+const DEFAULT_DESCRIPTION = 'OrganicSMM — Premium organic social media growth platform. AI-powered delivery patterns, real engagement, 100% safe for your accounts.';
+const SITE_NAME = 'OrganicSMM';
+const BASE_URL = 'https://sologrow-pro.lovable.app';
 
 export function PageMeta({
   title,

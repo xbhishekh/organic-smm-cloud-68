@@ -364,7 +364,7 @@ export default function Auth() {
         {/* Telegram Channel Link */}
         <div className="mt-12 group">
           <a
-            href="https://t.me/whopautopailotofficial"
+            href="https://t.me/organicsmm"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/30 transition-all duration-300 group/link"
