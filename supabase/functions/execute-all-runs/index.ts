@@ -715,8 +715,10 @@ serve(async (req) => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000)
       const isThisRunOverdue = runScheduledAt < fiveMinAgo
 
-      // SMART WAIT MODE: Prevent duplicate orders for SAME LINK on same provider panel.
-      // If Provider 1 has ANY active order (views/likes/comments) for this link, skip it entirely.
+      // SMART WAIT MODE: Prevent duplicate orders for SAME LINK + SAME SERVICE (engagement type).
+      // Each engagement type (views, likes, comments) is tracked INDEPENDENTLY per provider.
+      // Provider 1 busy with VIEWS on link X → skip Provider 1 for VIEWS only
+      // Provider 1 can still accept LIKES for the same link X (different service)
       const sameLink = (item.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
       const currentServiceId = item.service?.id
       
@@ -726,8 +728,6 @@ serve(async (req) => {
       
       // ============================================
       // EXECUTION-LEVEL GUARD: Only start ONE run per link+type per execution
-      // This ensures strict sequential delivery and prevents duplicate sends
-      // when multiple cron cycles or triggers overlap.
       // ============================================
       if (startedInThisExecution.has(localExecutionKey)) {
         console.log(`[${executionId}] ⏩ Skipping run #${run.run_number} - already started a run for this link/type in this execution`)
@@ -735,12 +735,13 @@ serve(async (req) => {
         continue
       }
       
-      // 1. Check STARTED runs for same LINK (ANY engagement type, not just same service)
-      // This prevents sending to a provider that already has an active order for this link
-      // Provider APIs reject with "active order with this link" regardless of service type
+      // 1. Check STARTED runs for same LINK + same SERVICE ID (same engagement type)
+      // Different engagement types (views vs likes) are independent — they use different services
+      // So Provider 1 can handle views AND likes for the same link simultaneously
       const startedRunsForLink = (activeRuns || []).filter((r: any) => {
         const runLink = (r.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
-        return runLink === sameLink
+        const runServiceId = r.engagement_order_item?.service_id || ''
+        return runLink === sameLink && runServiceId === currentServiceId
       })
       
       // 2. PROVIDER STATUS CHECK: DISABLED
