@@ -44,9 +44,9 @@ export default function Admin() {
   const { data: dashboardStats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
+      const { data, error } = await supabase.rpc('get_admin_dashboard_stats' as any);
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 

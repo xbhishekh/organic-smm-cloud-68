@@ -94,10 +94,10 @@ export default function AdminUsers() {
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-all-users-with-subs'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_admin_users_summary');
+      const { data, error } = await supabase.rpc('get_admin_users_summary' as any);
       if (error) throw error;
 
-      return (data || []).map((u: any) => ({
+      return ((data as any) || []).map((u: any) => ({
         ...u,
         wallet: {
           balance: u.balance,

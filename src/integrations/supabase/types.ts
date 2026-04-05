@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -141,6 +141,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      deposits: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string | null
+          currency: string | null
+          id: string
+          payment_method: string | null
+          proof_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       engagement_bundles: {
         Row: {
@@ -428,7 +473,6 @@ export type Database = {
           order_id: string | null
           peak_multiplier: number | null
           provider_account_id: string | null
-          provider_account_name: string | null
           provider_charge: number | null
           provider_order_id: string | null
           provider_remains: number | null
@@ -454,7 +498,6 @@ export type Database = {
           order_id?: string | null
           peak_multiplier?: number | null
           provider_account_id?: string | null
-          provider_account_name?: string | null
           provider_charge?: number | null
           provider_order_id?: string | null
           provider_remains?: number | null
@@ -480,7 +523,6 @@ export type Database = {
           order_id?: string | null
           peak_multiplier?: number | null
           provider_account_id?: string | null
-          provider_account_name?: string | null
           provider_charge?: number | null
           provider_order_id?: string | null
           provider_remains?: number | null
@@ -521,56 +563,83 @@ export type Database = {
       }
       platform_settings: {
         Row: {
-          global_markup_percent: number
+          created_at: string | null
+          global_markup_percent: number | null
           id: string
-          maintenance_mode: boolean
-          updated_at: string
-          updated_by: string | null
+          maintenance_mode: boolean | null
+          updated_at: string | null
         }
         Insert: {
-          global_markup_percent?: number
+          created_at?: string | null
+          global_markup_percent?: number | null
           id?: string
-          maintenance_mode?: boolean
-          updated_at?: string
-          updated_by?: string | null
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
         }
         Update: {
-          global_markup_percent?: number
+          created_at?: string | null
+          global_markup_percent?: number | null
           id?: string
-          maintenance_mode?: boolean
-          updated_at?: string
-          updated_by?: string | null
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           api_key: string | null
+          avatar_url: string | null
           created_at: string | null
           currency: string | null
           email: string
           full_name: string | null
           id: string
+          is_organic_mode_default: boolean | null
+          organic_peak_hours_enabled: boolean | null
+          organic_ratios: Json | null
+          organic_variance_percent: number | null
+          telegram_chat_id: string | null
+          telegram_id: string | null
+          telegram_notifications_enabled: boolean | null
+          telegram_username: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           api_key?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           currency?: string | null
           email: string
           full_name?: string | null
           id?: string
+          is_organic_mode_default?: boolean | null
+          organic_peak_hours_enabled?: boolean | null
+          organic_ratios?: Json | null
+          organic_variance_percent?: number | null
+          telegram_chat_id?: string | null
+          telegram_id?: string | null
+          telegram_notifications_enabled?: boolean | null
+          telegram_username?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           api_key?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           currency?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          is_organic_mode_default?: boolean | null
+          organic_peak_hours_enabled?: boolean | null
+          organic_ratios?: Json | null
+          organic_variance_percent?: number | null
+          telegram_chat_id?: string | null
+          telegram_id?: string | null
+          telegram_notifications_enabled?: boolean | null
+          telegram_username?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1034,30 +1103,8 @@ export type Database = {
       }
     }
     Functions: {
-      get_cron_jobs: {
-        Args: never
-        Returns: {
-          active: boolean
-          jobid: number
-          jobname: string
-          schedule: string
-        }[]
-      }
-      get_cron_run_details: {
-        Args: { limit_count?: number }
-        Returns: {
-          command: string
-          database: string
-          end_time: string
-          job_pid: number
-          jobid: number
-          return_message: string
-          runid: number
-          start_time: string
-          status: string
-          username: string
-        }[]
-      }
+      get_admin_dashboard_stats: { Args: never; Returns: Json }
+      get_admin_users_summary: { Args: never; Returns: Json }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
