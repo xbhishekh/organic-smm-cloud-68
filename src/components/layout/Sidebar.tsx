@@ -32,10 +32,13 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="h-full w-full overflow-hidden flex flex-col" style={{ background: '#fff', borderRight: '1px solid #f0e8ef' }}>
       {/* Logo */}
-      <div className="flex items-center justify-between h-[64px] px-5">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="OrganicSMM" className="w-8 h-8 rounded-lg object-cover" />
-          <span className="text-[15px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+          <img src={logo} alt="OrganicSMM" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
+          <div className="flex flex-col">
+            <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #ec4899, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
+          </div>
         </Link>
         <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg" style={{ color: '#ccc' }}>
           <X className="w-4 h-4" />
