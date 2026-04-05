@@ -4,8 +4,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useSubscription } from '@/hooks/useSubscription';
-import { SubscriptionCheckDialog } from '@/components/subscription/SubscriptionCheckDialog';
 import { OrganicTimelinePreview } from '@/components/organic/OrganicTimelinePreview';
 import { useServices } from '@/hooks/useServices';
 import { Button } from '@/components/ui/button';
