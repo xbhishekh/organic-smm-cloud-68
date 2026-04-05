@@ -1,8 +1,15 @@
+# Whopautopilot 2.0 - Robots.txt
+# https://whopautopailot-eight.vercel.app
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +19,13 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /dashboard
+Disallow: /orders
+Disallow: /wallet
+Disallow: /settings
+Disallow: /support
+
+# Sitemap
+Sitemap: https://whopautopailot-eight.vercel.app/sitemap.xml
