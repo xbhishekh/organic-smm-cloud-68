@@ -396,96 +396,49 @@ export default function Order() {
 
       setIsProcessing(true);
 
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          service_id: selectedService.id,
-          link,
-          quantity,
-          price: totalPrice,
-          status: 'pending',
-          is_drip_feed: deliveryMode !== 'direct',
-          drip_runs: deliveryMode !== 'direct' ? effectiveRuns : null,
-          drip_interval: deliveryMode !== 'direct' ? dripInterval : null,
-          drip_interval_unit: deliveryMode !== 'direct' ? dripIntervalUnit : null,
-          drip_quantity_per_run: deliveryMode !== 'direct' ? Math.floor(quantity / effectiveRuns) : null,
-          is_organic_mode: deliveryMode === 'organic',
-          variance_percent: deliveryMode === 'organic' ? variancePercent : 25,
-          peak_hours_enabled: deliveryMode === 'organic' ? peakHoursEnabled : false,
-        })
-        .select()
-        .single();
+      // Build order data
+      const orderData: any = {
+        service_id: selectedService.id,
+        link,
+        quantity,
+        price: totalPrice,
+        status: 'pending',
+        is_drip_feed: deliveryMode !== 'direct',
+        drip_runs: deliveryMode !== 'direct' ? effectiveRuns : null,
+        drip_interval: deliveryMode !== 'direct' ? dripInterval : null,
+        drip_interval_unit: deliveryMode !== 'direct' ? dripIntervalUnit : null,
+        drip_quantity_per_run: deliveryMode !== 'direct' ? Math.floor(quantity / effectiveRuns) : null,
+        is_organic_mode: deliveryMode === 'organic',
+        variance_percent: deliveryMode === 'organic' ? variancePercent : 25,
+        peak_hours_enabled: deliveryMode === 'organic' ? peakHoursEnabled : false,
+        service_name: selectedService.name,
+      };
 
-      if (orderError) throw orderError;
-
-      // Deduct from wallet
-      const newBalance = wallet.balance - totalPrice;
-      const { error: walletError } = await supabase
-        .from('wallets')
-        .update({
-          balance: newBalance,
-          total_spent: (wallet.total_spent || 0) + totalPrice
-        })
-        .eq('user_id', user.id);
-
-      if (walletError) throw walletError;
-
-      // Create transaction
-      const { error: txError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: user.id,
-          type: 'order',
-          amount: -totalPrice,
-          balance_after: newBalance,
-          order_id: order.id,
-          description: `Order #${order.order_number} - ${selectedService.name}`,
-          status: 'completed',
-        });
-
-      if (txError) throw txError;
-
-      let firstRunId: string | null = null;
-
-      // If organic mode, create run schedule
+      // Build runs if organic mode
+      let runs: any[] | undefined;
       if (deliveryMode === 'organic') {
-        // CRITICAL: Recalculate schedule times at submission to ensure they're in the future
-        // The preview times may be stale if user took time to fill the form
         const submissionTime = new Date();
-
-        // Add initial delay (2-5 minutes) to ensure first run is safely in the future
-        const initialDelayMs = (2 + Math.random() * 3) * 60000; // 2-5 minutes random delay
+        const initialDelayMs = (2 + Math.random() * 3) * 60000;
         const startTime = new Date(submissionTime.getTime() + initialDelayMs);
 
-        // CRITICAL: Use the SAME interval calculation as preview
-        // If time limit is enabled, distribute runs within that duration
         let baseIntervalMs: number;
-
         if (timeLimitEnabled && timeLimitValue > 0) {
-          // Time Limit ON: Fit all runs within specified duration
           const totalDurationMs = timeLimitValue * (
             timeLimitUnit === 'minutes' ? 60000 :
               timeLimitUnit === 'hours' ? 3600000 :
-                86400000 // days
+                86400000
           );
           baseIntervalMs = Math.floor(totalDurationMs / organicPreview.length);
         } else {
-          // Time Limit OFF: Use service-specific base interval from config
           baseIntervalMs = organicConfig.baseIntervalMinutes * 60000;
         }
 
-        const runs = organicPreview.map((run, index) => {
-          // Calculate new scheduled time from submission time
+        runs = organicPreview.map((run, index) => {
           const newScheduledAt = new Date(startTime.getTime() + (index * baseIntervalMs));
-
-          // Add random variance to each run's time (±2 minutes for organic feel)
           const timeVariance = (Math.random() * 4 - 2) * 60000;
           newScheduledAt.setTime(newScheduledAt.getTime() + timeVariance);
 
           return {
-            order_id: order.id,
             run_number: run.runNumber,
             scheduled_at: newScheduledAt.toISOString(),
             quantity_to_send: run.quantity,
@@ -495,43 +448,20 @@ export default function Order() {
             status: 'pending',
           };
         });
-
-        const { data: insertedRuns, error: runsError } = await supabase
-          .from('organic_run_schedule')
-          .insert(runs)
-          .select();
-
-        if (runsError) throw runsError;
-
-        // Get first run ID for immediate execution
-        if (insertedRuns && insertedRuns.length > 0) {
-          firstRunId = insertedRuns.find(r => r.run_number === 1)?.id || null;
-        }
       }
 
-      // INSTANT: Navigate immediately, process in background
+      // Call server-side function for secure wallet deduction
+      const { data, error } = await supabase.functions.invoke('place-order', {
+        body: { orderData, totalPrice, runs },
+      });
+
+      if (error) throw new Error(error.message || 'Failed to place order');
+      if (data?.error) throw new Error(data.error);
+
       toast.success('🚀 Order placed successfully!');
       refreshWallet();
 
-      // Fire-and-forget: process order in background
-      supabase.functions.invoke('process-order', {
-        body: {
-          order_id: order.id,
-          run_id: firstRunId
-        }
-      }).then(({ data: processResult, error: processError }) => {
-        if (processError) {
-          console.error('Process order error:', processError);
-        } else if (processResult?.success) {
-          console.log('Order processed:', processResult.provider_order_id);
-        } else if (processResult?.error) {
-          console.error('Provider error:', processResult.error);
-        }
-      }).catch(err => {
-        console.error('Edge function error:', err);
-      });
-
-      return order;
+      return data;
     },
     onSuccess: (order) => {
       setIsProcessing(false);
