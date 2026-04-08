@@ -179,7 +179,8 @@ serve(async (req) => {
 
     // Deduct payment
     const newBalance = wallet.balance - total_price
-    await supabase.from('wallets').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('id', wallet.id)
+    const newSpent = (wallet.total_spent || 0) + total_price
+    await supabase.from('wallets').update({ balance: newBalance, total_spent: newSpent, updated_at: new Date().toISOString() }).eq('id', wallet.id)
 
     // Check if bundle has AI Organic Mode enabled (default ON)
     let aiOrganicEnabled = true
@@ -194,6 +195,17 @@ serve(async (req) => {
     }).select().single()
 
     if (orderError || !order) return new Response(JSON.stringify({ error: `Failed to create order: ${orderError?.message || 'Unknown error'}` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+    // Record transaction for revenue tracking
+    await supabase.from('transactions').insert({
+      user_id,
+      type: 'order_payment',
+      amount: total_price,
+      balance_after: newBalance,
+      order_id: order.id,
+      status: 'completed',
+      description: `Engagement Order #${order.order_number}`,
+    })
 
     const createdItemIds = []
     for (const eng of engagements) {
