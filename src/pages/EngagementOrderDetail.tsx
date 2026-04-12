@@ -293,22 +293,23 @@ export default function EngagementOrderDetail() {
     },
   });
 
-  // Admin: Cancel entire order (order + items + pending runs)
+  // Admin: Cancel entire order (order + items + active/pending runs)
   const cancelOrderMutation = useMutation({
     mutationFn: async () => {
       if (!order?.id || !order?.items) throw new Error('No order data');
 
-      // 1. Cancel all pending AND failed runs for all items (failed runs also retry!)
+      const now = new Date().toISOString();
       const itemIds = order.items.map((item: any) => item.id);
-      for (const itemId of itemIds) {
-        await supabase
-          .from('organic_run_schedule')
-          .update({ status: 'cancelled', error_message: 'Order cancelled by admin', completed_at: new Date().toISOString() })
-          .eq('engagement_order_item_id', itemId)
-          .in('status', ['pending', 'failed']);
-      }
 
-      // 2. Cancel all non-completed items
+      // 1. Hard-stop parent order first so backend workers see cancelled state immediately
+      const { error: orderError } = await supabase
+        .from('engagement_orders')
+        .update({ status: 'cancelled' })
+        .eq('id', order.id)
+        .neq('status', 'cancelled');
+      if (orderError) throw orderError;
+
+      // 2. Cancel all active/non-final items
       const { error: itemsError } = await supabase
         .from('engagement_order_items')
         .update({ status: 'cancelled' })
@@ -316,15 +317,23 @@ export default function EngagementOrderDetail() {
         .not('status', 'in', '("completed","cancelled","failed")');
       if (itemsError) throw itemsError;
 
-      // 3. Cancel the order itself
-      const { error: orderError } = await supabase
-        .from('engagement_orders')
-        .update({ status: 'cancelled' })
-        .eq('id', order.id);
-      if (orderError) throw orderError;
+      // 3. Cancel all non-final runs so nothing can retry or continue from queue
+      for (const itemId of itemIds) {
+        const { error: runsError } = await supabase
+          .from('organic_run_schedule')
+          .update({
+            status: 'cancelled',
+            error_message: 'Order cancelled by admin',
+            completed_at: now,
+          })
+          .eq('engagement_order_item_id', itemId)
+          .in('status', ['pending', 'failed', 'started']);
+
+        if (runsError) throw runsError;
+      }
     },
     onSuccess: () => {
-      toast({ title: "🚫 Order Cancelled", description: "Order and all pending runs have been permanently cancelled." });
+      toast({ title: "🚫 Order Cancelled", description: "Order and all queued/active runs have been permanently cancelled." });
       refetch();
     },
     onError: (error: Error) => {
@@ -447,19 +456,24 @@ export default function EngagementOrderDetail() {
   const cancelItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
       if (!order?.id) throw new Error('No order');
-      // Cancel all pending AND failed runs
-      await supabase
-        .from('organic_run_schedule')
-        .update({ status: 'cancelled', error_message: 'Type cancelled by user', completed_at: new Date().toISOString() })
-        .eq('engagement_order_item_id', itemId)
-        .in('status', ['pending', 'failed']);
-      // Cancel item
-      const { error } = await supabase
+      const now = new Date().toISOString();
+
+      // Hard-stop item first
+      const { error: itemError } = await supabase
         .from('engagement_order_items')
         .update({ status: 'cancelled' })
-        .eq('id', itemId);
-      if (error) throw error;
-      // Check if ALL items are now cancelled → cancel parent order
+        .eq('id', itemId)
+        .neq('status', 'cancelled');
+      if (itemError) throw itemError;
+
+      // Cancel all active/queued runs for this item
+      await supabase
+        .from('organic_run_schedule')
+        .update({ status: 'cancelled', error_message: 'Type cancelled by user', completed_at: now })
+        .eq('engagement_order_item_id', itemId)
+        .in('status', ['pending', 'failed', 'started']);
+
+      // Check if ALL items are now effectively finished/cancelled → cancel parent order
       const { data: remainingItems } = await supabase
         .from('engagement_order_items')
         .select('id, status')
