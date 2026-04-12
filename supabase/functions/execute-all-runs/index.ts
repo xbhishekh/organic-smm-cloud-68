@@ -437,6 +437,13 @@ serve(async (req) => {
         break
       }
 
+      // FAST SKIP: If we already know this link has "active order" on all providers, skip immediately
+      const runLink = (run.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
+      if (runLink && activeOrderLinks.has(runLink)) {
+        skipped++
+        continue
+      }
+
       const isRetry = run.status === 'failed'
       const item = run.engagement_order_item
       if (!item) {
