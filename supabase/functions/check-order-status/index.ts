@@ -278,11 +278,23 @@ Deno.serve(async (req) => {
         }
 
         if (providerStatus === 'completed' || providerStatus === 'complete' || providerStatus === 'success') {
+          const orderStatus = run.engagement_order_item?.engagement_order?.status
+          const itemStatus = run.engagement_order_item?.status
+
+          if (orderStatus === 'cancelled' || itemStatus === 'cancelled') {
+            await supabase.from('organic_run_schedule').update({
+              ...trackingUpdate,
+              status: 'cancelled',
+              completed_at: new Date().toISOString(),
+              error_message: 'Order cancelled by user'
+            }).eq('id', run.id)
+            continue
+          }
+
           await supabase.from('organic_run_schedule').update({
             ...trackingUpdate,
             status: 'completed',
             completed_at: new Date().toISOString(),
-            // If this was previously "auto-completed", clear the confusing message once provider truly completes
             error_message: run.error_message?.includes('Auto-completed') ? null : run.error_message,
           }).eq('id', run.id)
 
