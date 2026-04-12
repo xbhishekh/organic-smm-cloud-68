@@ -34,7 +34,7 @@ export interface FullOrganicConfig {
 // Provider minimum order quantity FALLBACKS (actual values come from service table via minQuantity prop)
 // These are last-resort defaults only — real min comes from DB service.min_quantity
 export const PROVIDER_MINIMUMS: Record<string, number> = {
-  views: 10,
+  views: 100,
   likes: 10,
   comments: 10,
   saves: 10,
