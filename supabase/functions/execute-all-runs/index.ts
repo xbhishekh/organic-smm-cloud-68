@@ -758,40 +758,59 @@ serve(async (req) => {
         }
       }
       
-      // 3. NEW: Check for RECENTLY FAILED runs with "Active Order" errors (Cooldown Logic)
-      // If Provider A failed with "Active order" for THIS link in the last 15 mins,
-      // it is highly likely the panel is processing that specific link.
-      // We block it briefly for THAT link only to force failover to other providers.
-      const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
-      const { data: recentlyBusyRuns, error: busyRunsError } = await supabase
+      // 3. ANTI-REPEAT: Check recently completed/started runs for same link+type
+      // If Provider A already handled a run for THIS link+type in last 30 min,
+      // force rotation to Provider B/C. This prevents same panel getting repeat orders.
+      const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+      const { data: recentRunsForRotation } = await supabase
         .from('organic_run_schedule')
         .select(`
           provider_account_id, 
+          status,
           error_message,
+          completed_at,
+          started_at,
           engagement_order_item:engagement_order_items(
+            service_id,
             engagement_order:engagement_orders(link)
           )
         `)
-        .eq('status', 'pending')
-        .gte('last_status_check', fifteenMinAgo)
+        .in('status', ['completed', 'started', 'pending'])
+        .not('provider_account_id', 'is', null)
+        .neq('id', run.id)
+        .or(`completed_at.gte.${thirtyMinAgo},started_at.gte.${thirtyMinAgo},last_status_check.gte.${thirtyMinAgo}`)
 
-      if (!busyRunsError && recentlyBusyRuns && recentlyBusyRuns.length > 0) {
-        for (const rbr of recentlyBusyRuns) {
+      if (recentRunsForRotation && recentRunsForRotation.length > 0) {
+        for (const rbr of recentRunsForRotation) {
           if (!rbr.provider_account_id || busyAccountIds.includes(rbr.provider_account_id)) continue
           
-          const err = (rbr.error_message || '').toLowerCase()
-          const isBusyError = err.includes('active order') || 
-                              err.includes('already has an order') || 
-                              err.includes('wait until') ||
-                              err.includes('processing previous') ||
-                              err.includes('in progress')
+          const rbrLink = (rbr.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
+          const rbrServiceId = rbr.engagement_order_item?.service_id || ''
           
-          if (isBusyError) {
-            // ONLY block if it's the SAME link
-            const rbrLink = (rbr.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
-            if (rbrLink === sameLink) {
-              console.log(`⏳ Account ${rbr.provider_account_id} recently reported busy for link ${sameLink} — adding to cooldown list`)
+          // Same link AND same service (engagement type) = same provider should NOT get repeat
+          if (rbrLink === sameLink && rbrServiceId === currentServiceId) {
+            // For completed runs: cooldown to force rotation
+            if (rbr.status === 'completed') {
+              console.log(`🔄 Account ${rbr.provider_account_id} recently completed same link+type — forcing rotation`)
               busyAccountIds.push(rbr.provider_account_id)
+            }
+            // For started runs: provider is actively processing
+            if (rbr.status === 'started') {
+              console.log(`⏳ Account ${rbr.provider_account_id} actively processing same link+type — excluding`)
+              busyAccountIds.push(rbr.provider_account_id)
+            }
+            // For pending runs with "active order" errors: provider rejected recently
+            if (rbr.status === 'pending') {
+              const err = (rbr.error_message || '').toLowerCase()
+              const isBusyError = err.includes('active order') || 
+                                  err.includes('already has an order') || 
+                                  err.includes('wait until') ||
+                                  err.includes('processing previous') ||
+                                  err.includes('in progress')
+              if (isBusyError) {
+                console.log(`⏳ Account ${rbr.provider_account_id} recently reported busy for same link+type — cooldown`)
+                busyAccountIds.push(rbr.provider_account_id)
+              }
             }
           }
         }
