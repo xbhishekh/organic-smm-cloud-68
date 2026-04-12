@@ -388,6 +388,8 @@ serve(async (req) => {
     const itemRunCount = new Map<string, number>()
     const MAX_CONCURRENT_PER_ITEM = 3
     const executionProviderMap = new Map<string, Set<string>>()
+    // Track links where ALL providers returned "active order" — batch-postpone all runs for that link
+    const activeOrderLinks = new Set<string>()
     
     const deduplicatedRuns = activeEngagementRuns.filter(run => {
       const itemId = run.engagement_order_item_id
@@ -409,7 +411,7 @@ serve(async (req) => {
     })
 
     const allEngagementRuns = [...deduplicatedRuns, ...activeFailedRuns]
-    console.log(`Processing ${allEngagementRuns.length} runs (${deduplicatedRuns.length} pending + ${activeFailedRuns.length} retry)`)
+    console.log(`Processing ${allEngagementRuns.length} runs (${deduplicatedRuns.length} pending + ${activeFailedRuns.length} retry), total overdue in DB: check query`)
 
     // PRE-BUILD busy account lookup for recently busy runs (link → Set<accountId>)
     const recentlyBusyByLink = new Map<string, Set<string>>()
@@ -433,6 +435,13 @@ serve(async (req) => {
       if (Date.now() - startTime > 50000) {
         console.log(`⏰ Approaching timeout (${Date.now() - startTime}ms), stopping processing. Remaining runs will be picked up next cycle.`)
         break
+      }
+
+      // FAST SKIP: If we already know this link has "active order" on all providers, skip immediately
+      const runLink = (run.engagement_order_item?.engagement_order?.link || '').toLowerCase().replace(/\/$/, '')
+      if (runLink && activeOrderLinks.has(runLink)) {
+        skipped++
+        continue
       }
 
       const isRetry = run.status === 'failed'
@@ -624,9 +633,18 @@ serve(async (req) => {
       
       if (accountsToTry.length === 0) {
         if (mappingCache.hasAnyForService(item.service.id)) {
+          // POSTPONE: All providers busy — push scheduled_at forward so we don't waste cycles
+          const postponeMs = 10 * 60 * 1000
+          const newScheduledAt = new Date(Date.now() + postponeMs).toISOString()
+          await supabase.from('organic_run_schedule').update({
+            scheduled_at: newScheduledAt,
+            error_message: `[Postponed] All providers busy for this link`,
+            last_status_check: new Date().toISOString(),
+          }).eq('id', run.id)
           skipped++
+          console.log(`⏳ Run #${run.run_number} postponed 10min (all providers pre-filtered as busy)`)
           results.push({ run_id: run.id, run_number: run.run_number, type: item.engagement_type,
-            success: false, skipped: true, reason: `All providers busy` })
+            success: false, skipped: true, reason: `All providers busy - postponed 10min` })
         } else {
           await supabase.from('organic_run_schedule').update({
             status: 'failed', error_message: 'No provider accounts configured',
@@ -894,7 +912,6 @@ serve(async (req) => {
         const isActiveOrderError = lastErr.includes('active order') || lastErr.includes('wait until order') || 
           lastErr.includes('already has an order') || lastErr.includes('in progress')
         
-        // If all providers say "active order on this link", postpone by 10 min instead of retrying immediately
         const postponeMs = isActiveOrderError ? 10 * 60 * 1000 : 2 * 60 * 1000
         const newScheduledAt = new Date(Date.now() + postponeMs).toISOString()
         
@@ -906,8 +923,16 @@ serve(async (req) => {
           retry_count: retryCount, last_status_check: new Date().toISOString(),
         }).eq('id', run.id)
         skipped++
-        if (isActiveOrderError) {
-          console.log(`⏳ Run #${run.run_number} postponed 10min (active order on link)`)
+
+        // BATCH POSTPONE: If active order error, mark link and batch-postpone ALL pending runs for this link
+        if (isActiveOrderError && sameLink) {
+          activeOrderLinks.add(sameLink)
+          const { count: batchCount } = await supabase.from('organic_run_schedule')
+            .update({ scheduled_at: newScheduledAt, error_message: `[Batch postponed] Active order on link` })
+            .eq('status', 'pending')
+            .lte('scheduled_at', new Date().toISOString())
+            .filter('engagement_order_item_id', 'not.is', null)
+          console.log(`⏳ Link batch-postponed 10min: ${batchCount || 0} runs (active order)`)
         }
         results.push({ run_id: run.id, type: item.engagement_type, run_number: run.run_number, 
           success: false, error: lastError, will_retry: true, retry_attempt: retryCount, postponed_min: postponeMs / 60000 })
