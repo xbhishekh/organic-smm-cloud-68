@@ -306,28 +306,40 @@ Deno.serve(async (req) => {
           await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
 
         } else if (providerStatus === 'cancelled' || providerStatus === 'canceled' || providerStatus === 'refunded' || providerStatus === 'refund' || providerStatus === 'canscelled') {
-          // Check if we can retry this run - AGGRESSIVE retries (up to 15)
-          const currentRetryCount = run.retry_count || 0
-          if (currentRetryCount < 15) {
-            console.log(`🔄 Marking cancelled/refunded run for retry (attempt ${currentRetryCount + 1}/15)`)
+          const orderStatus = run.engagement_order_item?.engagement_order?.status
+          const itemStatus = run.engagement_order_item?.status
+
+          if (orderStatus === 'cancelled' || itemStatus === 'cancelled') {
             await supabase.from('organic_run_schedule').update({
               ...trackingUpdate,
-              status: 'failed',
+              status: 'cancelled',
               completed_at: new Date().toISOString(),
-              error_message: `Auto-retry: ${providerStatus} by provider`
+              error_message: 'Order cancelled by user'
             }).eq('id', run.id)
-            failed++
           } else {
-            console.log(`❌ Max retries reached for cancelled run`)
-            await supabase.from('organic_run_schedule').update({
-              ...trackingUpdate,
-              status: 'failed',
-              completed_at: new Date().toISOString(),
-              error_message: `Max retries (15) reached: ${providerStatus} by provider`,
-              retry_count: 99
-            }).eq('id', run.id)
-            failed++
-            await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
+            // Provider-side cancel/refund for active order: mark this run failed for retry
+            const currentRetryCount = run.retry_count || 0
+            if (currentRetryCount < 15) {
+              console.log(`🔄 Marking cancelled/refunded run for retry (attempt ${currentRetryCount + 1}/15)`)
+              await supabase.from('organic_run_schedule').update({
+                ...trackingUpdate,
+                status: 'failed',
+                completed_at: new Date().toISOString(),
+                error_message: `Auto-retry: ${providerStatus} by provider`
+              }).eq('id', run.id)
+              failed++
+            } else {
+              console.log(`❌ Max retries reached for cancelled run`)
+              await supabase.from('organic_run_schedule').update({
+                ...trackingUpdate,
+                status: 'failed',
+                completed_at: new Date().toISOString(),
+                error_message: `Max retries (15) reached: ${providerStatus} by provider`,
+                retry_count: 99
+              }).eq('id', run.id)
+              failed++
+              await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
+            }
           }
 
         } else {
