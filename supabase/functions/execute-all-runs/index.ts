@@ -749,6 +749,15 @@ serve(async (req) => {
       // as 'completed', we trust that and don't use old provider statuses to block new orders.
       const busyAccountIds: string[] = []
       
+      // Add providers already used for this link+type in THIS execution cycle
+      // This ensures Run 2 goes to Provider 2 if Provider 1 was already used for Run 1
+      for (const usedId of usedProvidersForKey) {
+        if (!busyAccountIds.includes(usedId)) {
+          busyAccountIds.push(usedId)
+          console.log(`[${executionId}] 🔄 Provider ${usedId} already used for ${currentType} on this link in this execution — excluding`)
+        }
+      }
+      
       // 3. NEW: Check for RECENTLY FAILED runs with "Active Order" errors (Cooldown Logic)
       // If Provider A failed with "Active order" for THIS link in the last 15 mins,
       // it is highly likely the panel is processing that specific link.
