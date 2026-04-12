@@ -31,10 +31,10 @@ export interface FullOrganicConfig {
   varietyIndex: number;        // How varied the delivery is (higher = more organic)
 }
 
-// Provider minimum order quantity FALLBACKS (actual values should come from service table)
-// CRITICAL: Views minimum is 100 from provider, others are 10
+// Provider minimum order quantity FALLBACKS (actual values come from service table via minQuantity prop)
+// These are last-resort defaults only — real min comes from DB service.min_quantity
 export const PROVIDER_MINIMUMS: Record<string, number> = {
-  views: 100,   // Provider minimum for views is 100 (updated from service DB)
+  views: 10,
   likes: 10,
   comments: 10,
   saves: 10,
