@@ -351,6 +351,11 @@ serve(async (req) => {
               qty = remaining
             }
 
+            // HARD STOP: Don't create more runs than absoluteMaxRuns (prevents too many small runs)
+            if (!timeLimitApplied && runNumber > absoluteMaxRuns && remaining > 0) {
+              qty = remaining // Dump all remaining into this last run
+            }
+
             scheduleEntries.push({
               engagement_order_item_id: itemId,
               run_number: runNumber,
@@ -387,6 +392,17 @@ serve(async (req) => {
               carry = e.quantity_to_send
             } else {
               if (e.quantity_to_send > 0) validatedEntries.push(e)
+            }
+          }
+
+          // FINAL FIX: If the last validated entry is below providerMin, merge it into the previous one
+          if (validatedEntries.length >= 2) {
+            const lastEntry = validatedEntries[validatedEntries.length - 1]
+            if (lastEntry.quantity_to_send < providerMin) {
+              const prevEntry = validatedEntries[validatedEntries.length - 2]
+              prevEntry.quantity_to_send += lastEntry.quantity_to_send
+              prevEntry.base_quantity = prevEntry.quantity_to_send
+              validatedEntries.pop()
             }
           }
           
