@@ -79,9 +79,11 @@ Deno.serve(async (req) => {
         provider_account:provider_accounts(id, name, api_key, api_url),
         engagement_order_item:engagement_order_items(
           id,
+          status,
           engagement_type,
           engagement_order_id,
-          service:services(provider_id)
+          service:services(provider_id),
+          engagement_order:engagement_orders(id, status)
         )
       `)
       // Check ALL of these:
