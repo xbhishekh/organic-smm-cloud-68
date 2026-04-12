@@ -1047,9 +1047,13 @@ serve(async (req) => {
       } else {
         const isTemporaryError = lastError?.startsWith('TEMP_ERROR:')
         if (isTemporaryError) {
+          const cleanError = lastError?.replace('TEMP_ERROR: ', '') || ''
+          const isActiveOrder = cleanError.toLowerCase().includes('active order') || cleanError.toLowerCase().includes('wait until order')
+          const postponeMs = isActiveOrder ? 10 * 60 * 1000 : 2 * 60 * 1000
           await supabase.from('organic_run_schedule').update({
             status: 'pending', started_at: null,
-            error_message: `[Will retry] ${lastError?.replace('TEMP_ERROR: ', '')}`,
+            scheduled_at: new Date(Date.now() + postponeMs).toISOString(),
+            error_message: `[Will retry] ${cleanError}`,
           }).eq('id', run.id)
           skipped++
         } else {
