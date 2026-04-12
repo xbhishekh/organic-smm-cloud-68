@@ -388,6 +388,8 @@ serve(async (req) => {
     const itemRunCount = new Map<string, number>()
     const MAX_CONCURRENT_PER_ITEM = 3
     const executionProviderMap = new Map<string, Set<string>>()
+    // Track links where ALL providers returned "active order" — batch-postpone all runs for that link
+    const activeOrderLinks = new Set<string>()
     
     const deduplicatedRuns = activeEngagementRuns.filter(run => {
       const itemId = run.engagement_order_item_id
@@ -409,7 +411,7 @@ serve(async (req) => {
     })
 
     const allEngagementRuns = [...deduplicatedRuns, ...activeFailedRuns]
-    console.log(`Processing ${allEngagementRuns.length} runs (${deduplicatedRuns.length} pending + ${activeFailedRuns.length} retry)`)
+    console.log(`Processing ${allEngagementRuns.length} runs (${deduplicatedRuns.length} pending + ${activeFailedRuns.length} retry), total overdue in DB: check query`)
 
     // PRE-BUILD busy account lookup for recently busy runs (link → Set<accountId>)
     const recentlyBusyByLink = new Map<string, Set<string>>()
