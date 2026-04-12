@@ -65,11 +65,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    const { service_name, ...orderInsertData } = orderData;
+
     // 2. Create order
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .insert({
-        ...orderData,
+        ...orderInsertData,
         user_id: user.id,
       })
       .select()
@@ -104,7 +106,7 @@ Deno.serve(async (req) => {
       amount: totalPrice,
       balance_after: newBalance,
       order_id: order.id,
-      description: `Order #${order.order_number} - ${orderData.service_name || 'Service Order'}`,
+      description: `Order #${order.order_number} - ${service_name || 'Service Order'}`,
       status: "completed",
     });
 
@@ -125,7 +127,7 @@ Deno.serve(async (req) => {
     }
 
     // 6. Trigger process-order for non-organic orders
-    if (!orderData.is_organic_mode) {
+    if (!orderInsertData.is_organic_mode) {
       try {
         await supabaseAdmin.functions.invoke("process-order", {
           body: { order_id: order.id },
