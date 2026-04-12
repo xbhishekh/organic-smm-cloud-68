@@ -351,6 +351,11 @@ serve(async (req) => {
               qty = remaining
             }
 
+            // HARD STOP: Don't create more runs than absoluteMaxRuns (prevents too many small runs)
+            if (!timeLimitApplied && runNumber > absoluteMaxRuns && remaining > 0) {
+              qty = remaining // Dump all remaining into this last run
+            }
+
             scheduleEntries.push({
               engagement_order_item_id: itemId,
               run_number: runNumber,
