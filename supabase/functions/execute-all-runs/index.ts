@@ -563,9 +563,11 @@ serve(async (req) => {
         break
       }
 
-      // FAST SKIP: If we already know this link has "active order" on all providers, skip immediately
+      // FAST SKIP: If we already know this link+type has "active order" on all providers, skip immediately
       const runLink = normalizeLink(run.engagement_order_item?.engagement_order?.link)
-      if (runLink && activeOrderLinks.has(runLink)) {
+      const runType = (run.engagement_order_item?.engagement_type || '').toLowerCase()
+      const linkTypeKey = `${runLink}|${runType}`
+      if (runLink && activeOrderLinkTypes.has(linkTypeKey)) {
         skipped++
         continue
       }
