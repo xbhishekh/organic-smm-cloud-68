@@ -238,6 +238,13 @@ const isTerminalProviderStatus = (status?: string | null) => {
   return ['completed', 'complete', 'partial', 'refunded', 'canceled', 'cancelled', 'error', 'failed', 'success', 'refund', 'canscelled'].includes(normalized)
 }
 
+const getNestedEngagementOrderLink = (value: any) => {
+  if (Array.isArray(value)) {
+    return value[0]?.link || ''
+  }
+  return value?.link || ''
+}
+
 async function batchPostponeEngagementRunsForLink(
   supabase: SupabaseClient,
   normalizedLink: string,
@@ -281,6 +288,63 @@ async function batchPostponeEngagementRunsForLink(
   }
 
   return updatedRuns?.length || 0
+}
+
+async function updateEngagementOrderStatus(supabase: SupabaseClient, engagementOrderId: string, itemId: string) {
+  if (!engagementOrderId) return
+
+  const { data: parentOrder } = await supabase
+    .from('engagement_orders')
+    .select('status')
+    .eq('id', engagementOrderId)
+    .maybeSingle()
+
+  if (parentOrder?.status === 'cancelled') return
+
+  if (itemId) {
+    const { data: currentItem } = await supabase
+      .from('engagement_order_items')
+      .select('status')
+      .eq('id', itemId)
+      .maybeSingle()
+
+    if (currentItem?.status !== 'cancelled') {
+      const { data: itemRuns } = await supabase
+        .from('organic_run_schedule')
+        .select('status')
+        .eq('engagement_order_item_id', itemId)
+
+      if (itemRuns && itemRuns.length > 0) {
+        const completedCount = itemRuns.filter((r: any) => r.status === 'completed').length
+        const failedCount = itemRuns.filter((r: any) => r.status === 'failed').length
+        const totalRuns = itemRuns.length
+
+        let itemStatus = 'processing'
+        if (completedCount === totalRuns) itemStatus = 'completed'
+        else if (completedCount + failedCount === totalRuns) itemStatus = failedCount > 0 ? 'partial' : 'completed'
+
+        await supabase.from('engagement_order_items').update({ status: itemStatus }).eq('id', itemId)
+      }
+    }
+  }
+
+  const { data: allItems } = await supabase
+    .from('engagement_order_items')
+    .select('status')
+    .eq('engagement_order_id', engagementOrderId)
+
+  if (!allItems || allItems.length === 0) return
+
+  const completedItems = allItems.filter((i: any) => i.status === 'completed').length
+  const failedItems = allItems.filter((i: any) => i.status === 'failed').length
+  const totalItems = allItems.length
+
+  let orderStatus = 'processing'
+  if (completedItems === totalItems) orderStatus = 'completed'
+  else if (completedItems + failedItems === totalItems && failedItems > 0) orderStatus = 'partial'
+  else if (failedItems === totalItems) orderStatus = 'failed'
+
+  await supabase.from('engagement_orders').update({ status: orderStatus }).eq('id', engagementOrderId).neq('status', 'cancelled')
 }
 
 serve(async (req) => {
@@ -476,7 +540,7 @@ serve(async (req) => {
         const isBusyError = err.includes('active order') || err.includes('already has an order') || 
           err.includes('wait until') || err.includes('processing previous') || err.includes('in progress')
         if (isBusyError) {
-          const rbrLink = normalizeLink(rbr.engagement_order_item?.engagement_order?.link)
+          const rbrLink = normalizeLink(getNestedEngagementOrderLink(rbr.engagement_order_item?.engagement_order))
           if (!recentlyBusyByLink.has(rbrLink)) recentlyBusyByLink.set(rbrLink, new Set())
           recentlyBusyByLink.get(rbrLink)!.add(rbr.provider_account_id)
         }
