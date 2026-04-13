@@ -256,6 +256,7 @@ const getNestedEngagementOrderLink = (value: any) => {
 async function batchPostponeEngagementRunsForLink(
   supabase: SupabaseClient,
   normalizedLink: string,
+  engagementType: string,
   scheduledAt: string,
   reason: string,
 ) {
@@ -263,7 +264,7 @@ async function batchPostponeEngagementRunsForLink(
 
   const { data: dueRuns, error: dueRunsError } = await supabase
     .from('organic_run_schedule')
-    .select('id, engagement_order_item:engagement_order_items!inner(engagement_order:engagement_orders!inner(link))')
+    .select('id, engagement_order_item:engagement_order_items!inner(engagement_type, engagement_order:engagement_orders!inner(link))')
     .eq('status', 'pending')
     .not('engagement_order_item_id', 'is', null)
     .lte('scheduled_at', new Date().toISOString())
@@ -274,8 +275,13 @@ async function batchPostponeEngagementRunsForLink(
     return 0
   }
 
+  // Only postpone runs with matching link AND engagement type
   const matchingIds = dueRuns
-    .filter((dueRun: any) => normalizeLink(dueRun.engagement_order_item?.engagement_order?.link) === normalizedLink)
+    .filter((dueRun: any) => {
+      const runLink = normalizeLink(dueRun.engagement_order_item?.engagement_order?.link)
+      const runType = (dueRun.engagement_order_item?.engagement_type || '').toLowerCase()
+      return runLink === normalizedLink && runType === engagementType.toLowerCase()
+    })
     .map((dueRun: any) => dueRun.id)
 
   if (matchingIds.length === 0) return 0
