@@ -1067,16 +1067,18 @@ serve(async (req) => {
         }).eq('id', run.id)
         skipped++
 
-        // BATCH POSTPONE: If active order error, mark link and batch-postpone ALL pending runs for this link
+        // BATCH POSTPONE: If active order error, mark link+type and batch-postpone same-type runs for this link
         if (isActiveOrderError && sameLink) {
-          activeOrderLinks.add(sameLink)
+          const linkTypeKey = `${sameLink}|${currentTypeNormalized}`
+          activeOrderLinkTypes.add(linkTypeKey)
           const batchCount = await batchPostponeEngagementRunsForLink(
             supabase,
             sameLink,
+            currentTypeNormalized,
             newScheduledAt,
-            '[Batch postponed] Active order on link',
+            `[Batch postponed] Active order on link for ${currentTypeNormalized}`,
           )
-          console.log(`⏳ Link batch-postponed ${postponeMs / 60000}min: ${batchCount} matching runs (active order)`)
+          console.log(`⏳ Link+type batch-postponed ${postponeMs / 60000}min: ${batchCount} matching ${currentTypeNormalized} runs (active order)`)
         }
         results.push({ run_id: run.id, type: item.engagement_type, run_number: run.run_number, 
           success: false, error: lastError, will_retry: true, retry_attempt: retryCount, postponed_min: postponeMs / 60000 })
