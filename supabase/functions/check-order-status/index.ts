@@ -277,7 +277,9 @@ Deno.serve(async (req) => {
           last_status_check: new Date().toISOString()
         }
 
-        if (providerStatus === 'completed' || providerStatus === 'complete' || providerStatus === 'success') {
+        const deliveredAll = remains === 0 && !['cancelled', 'canceled', 'refunded', 'refund', 'failed', 'error', 'canscelled'].includes(providerStatus)
+
+        if (providerStatus === 'completed' || providerStatus === 'complete' || providerStatus === 'success' || deliveredAll) {
           const orderStatus = run.engagement_order_item?.engagement_order?.status
           const itemStatus = run.engagement_order_item?.status
 
@@ -295,7 +297,9 @@ Deno.serve(async (req) => {
             ...trackingUpdate,
             status: 'completed',
             completed_at: new Date().toISOString(),
-            error_message: run.error_message?.includes('Auto-completed') ? null : run.error_message,
+            error_message: deliveredAll
+              ? 'Auto-completed (provider remains reached 0)'
+              : run.error_message?.includes('Auto-completed') ? null : run.error_message,
           }).eq('id', run.id)
 
           completed++
@@ -367,7 +371,26 @@ Deno.serve(async (req) => {
             }
           }
 
-        } else {
+          } else if (deliveredAll) {
+            await supabase.from('organic_run_schedule').update({
+              ...trackingUpdate,
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              error_message: 'Auto-completed (provider remains reached 0)'
+            }).eq('id', run.id)
+
+            completed++
+            results.push({
+              run_id: run.id,
+              run_number: run.run_number,
+              type: run.engagement_order_item?.engagement_type,
+              status: 'completed',
+              provider_order_id: run.provider_order_id,
+              delivered: run.quantity_to_send,
+              remains: 0
+            })
+            await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
+          } else {
           // Processing/Pending/In progress - update tracking data for live view
           await supabase.from('organic_run_schedule').update(trackingUpdate).eq('id', run.id)
           
@@ -514,12 +537,16 @@ Deno.serve(async (req) => {
             last_status_check: new Date().toISOString()
           }
 
-          if (providerStatus === 'completed' || providerStatus === 'complete' || providerStatus === 'success') {
+          const deliveredAll = remains === 0 && !['cancelled', 'canceled', 'refunded', 'refund', 'failed', 'error', 'canscelled'].includes(providerStatus)
+
+          if (providerStatus === 'completed' || providerStatus === 'complete' || providerStatus === 'success' || deliveredAll) {
             await supabase.from('organic_run_schedule').update({
               ...trackingUpdate,
               status: 'completed',
               completed_at: new Date().toISOString(),
-              error_message: run.error_message?.includes('Auto-completed') ? null : run.error_message,
+              error_message: deliveredAll
+                ? 'Auto-completed (provider remains reached 0)'
+                : run.error_message?.includes('Auto-completed') ? null : run.error_message,
             }).eq('id', run.id)
 
             completed++

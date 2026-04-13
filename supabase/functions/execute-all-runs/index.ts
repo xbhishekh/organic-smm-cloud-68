@@ -238,6 +238,11 @@ const isTerminalProviderStatus = (status?: string | null) => {
   return ['completed', 'complete', 'partial', 'refunded', 'canceled', 'cancelled', 'error', 'failed', 'success', 'refund', 'canscelled'].includes(normalized)
 }
 
+const isFailedProviderStatus = (status?: string | null) => {
+  const normalized = (status || '').toLowerCase().trim()
+  return ['refunded', 'canceled', 'cancelled', 'error', 'failed', 'refund', 'canscelled'].includes(normalized)
+}
+
 const getNestedEngagementOrderLink = (value: any) => {
   if (Array.isArray(value)) {
     return getNestedEngagementOrderLink(value[0])
@@ -691,15 +696,18 @@ serve(async (req) => {
         for (const stuckRun of startedRunsForLink) {
           const terminalStatuses = ['Completed', 'Complete', 'Partial', 'Refunded', 'Canceled', 'Cancelled', 'Error', 'Failed', 'Success', 'Refund', 'Canscelled']
           const isTerminal = stuckRun.provider_status && terminalStatuses.includes(stuckRun.provider_status)
+          const hasNoRemains = typeof stuckRun.provider_remains === 'number' && stuckRun.provider_remains <= 0 && !!stuckRun.provider_order_id
           
           const startedAt = new Date(stuckRun.started_at || 0)
           const runAge = Math.round((Date.now() - startedAt.getTime()) / 1000)
           
-          if (isTerminal) {
-            console.log(`🔄 Auto-completing run #${stuckRun.run_number} (terminal: ${stuckRun.provider_status})`)
+          if (isTerminal || hasNoRemains) {
+            console.log(`🔄 Auto-completing run #${stuckRun.run_number} (${hasNoRemains ? 'no remains left' : `terminal: ${stuckRun.provider_status}`})`)
             await supabase.from('organic_run_schedule').update({
               status: 'completed', completed_at: new Date().toISOString(),
-              error_message: `Auto-completed (status: ${stuckRun.provider_status})`,
+              error_message: hasNoRemains
+                ? `Auto-completed (provider remains reached 0)`
+                : `Auto-completed (status: ${stuckRun.provider_status})`,
             }).eq('id', stuckRun.id)
           } else if (stuckRun.provider_account_id) {
             if (!stuckRun.provider_order_id && runAge > 60) {
@@ -990,7 +998,8 @@ serve(async (req) => {
         }
         
         // Update run + item + order in parallel
-        const providerIsTerminal = isTerminalProviderStatus(verifiedStatus)
+        const providerDeliveredAll = verifiedRemains === 0 && !isFailedProviderStatus(verifiedStatus)
+        const providerIsTerminal = isTerminalProviderStatus(verifiedStatus) || providerDeliveredAll
 
         const updatePromises = [
           supabase.from('organic_run_schedule').update({
@@ -1000,7 +1009,13 @@ serve(async (req) => {
             provider_start_count: verifiedStartCount, provider_remains: verifiedRemains,
             provider_charge: verifiedCharge,
             ...(providerIsTerminal
-              ? { status: 'completed', completed_at: new Date().toISOString() }
+              ? {
+                  status: 'completed',
+                  completed_at: new Date().toISOString(),
+                  ...(providerDeliveredAll && !isTerminalProviderStatus(verifiedStatus)
+                    ? { error_message: 'Auto-completed (provider remains reached 0)' }
+                    : {}),
+                }
               : {}),
             last_status_check: verifiedLastStatusCheck || new Date().toISOString(),
           }).eq('id', run.id).eq('status', 'started'),
