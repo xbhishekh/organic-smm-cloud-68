@@ -791,14 +791,13 @@ serve(async (req) => {
         continue
       }
 
-      // Quantity handling — ALWAYS boost to provider minimum to avoid repeated rejections
+      // Quantity handling — respect configured service minimum only
       let quantityToSend = run.quantity_to_send
-      const serviceMinQty = item.service.min_quantity || 10
-      // Use at least 100 as absolute floor (most providers require this)
-      const effectiveMin = Math.max(serviceMinQty, 100)
+      const serviceMinQty = Number(item.service.min_quantity || 0)
+      const effectiveMin = serviceMinQty > 0 ? serviceMinQty : quantityToSend
       
       if (quantityToSend < effectiveMin) {
-        console.log(`📏 Run #${run.run_number}: qty ${quantityToSend} below min ${effectiveMin}, boosting`)
+        console.log(`📏 Run #${run.run_number}: qty ${quantityToSend} below configured min ${effectiveMin}, boosting`)
         quantityToSend = effectiveMin
         await supabase.from('organic_run_schedule')
           .update({ quantity_to_send: quantityToSend })

@@ -185,12 +185,12 @@ serve(async (req) => {
       // Step 6: Send to provider API
       console.log(`Sending to ${provider.name}: ${run.quantity_to_send} items`)
       
-      // Always boost to provider minimum to avoid repeated rejections
+      // Respect configured service minimum only
       let quantityToSend = run.quantity_to_send
-      const serviceMinQty = orderData.service.min_quantity || 10
-      const effectiveMin = Math.max(serviceMinQty, 100)
+      const serviceMinQty = Number(orderData.service.min_quantity || 0)
+      const effectiveMin = serviceMinQty > 0 ? serviceMinQty : quantityToSend
       if (quantityToSend < effectiveMin) {
-        console.log(`📏 Boosting qty from ${quantityToSend} to ${effectiveMin}`)
+        console.log(`📏 Boosting qty from ${quantityToSend} to configured min ${effectiveMin}`)
         quantityToSend = effectiveMin
       }
       
