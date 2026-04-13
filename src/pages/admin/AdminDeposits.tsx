@@ -45,7 +45,7 @@ export default function AdminDeposits() {
             const { data: txData, error: txError } = await supabase
                 .from('transactions')
                 .select('*')
-                .eq('payment_method', 'razorpay_manual')
+                .in('payment_method', ['razorpay_manual', 'usdt_bep20'])
                 .order('created_at', { ascending: false });
 
             if (txError) {
