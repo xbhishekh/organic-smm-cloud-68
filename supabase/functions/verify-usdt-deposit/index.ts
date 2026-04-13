@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Get user from token
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !user) {
@@ -66,6 +67,7 @@ Deno.serve(async (req) => {
 
     const { txHash, claimedAmount } = await req.json();
 
+    // Validate txHash format
     if (!txHash || !/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
       return new Response(
         JSON.stringify({ error: "Invalid transaction hash format. Expected 0x + 64 hex characters." }),
@@ -94,7 +96,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify on-chain that tx is valid
+    // Get receipt from BSC RPC
     const receipt = (await callRpc("eth_getTransactionReceipt", [txHash])) as any;
     if (!receipt) {
       return new Response(
@@ -121,6 +123,7 @@ Deno.serve(async (req) => {
       const toMatch = toAddress === DEPOSIT_WALLET;
 
       if (contractMatch && isTransfer && toMatch) {
+        // Parse amount: USDT on BSC has 18 decimals
         const rawAmount = BigInt(log.data);
         transferAmount = Number(rawAmount) / 1e18;
         break;
@@ -129,7 +132,7 @@ Deno.serve(async (req) => {
 
     if (transferAmount === 0) {
       return new Response(
-        JSON.stringify({ error: "No USDT BEP20 transfer to our wallet found in this transaction." }),
+        JSON.stringify({ error: "No USDT BEP20 transfer to our wallet found in this transaction. Make sure you sent to the correct address on BNB Smart Chain." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -144,47 +147,81 @@ Deno.serve(async (req) => {
       );
     }
 
-    // DO NOT auto-credit wallet — just create a pending transaction for admin approval
-    const { error: txErr } = await supabaseAdmin.from("transactions").insert({
-      user_id: userId,
-      type: "deposit",
-      amount: transferAmount,
-      balance_after: 0, // will be set when admin approves
-      status: "pending",
-      payment_method: "usdt_bep20",
-      payment_reference: txHash.toLowerCase(),
-      description: JSON.stringify({
-        type: "usdt_bep20",
-        usdt_amount: transferAmount.toFixed(4),
-        on_chain_verified: true,
-      }),
-    });
+    // Get current wallet balance
+    const { data: wallet, error: walletErr } = await supabaseAdmin
+      .from("wallets")
+      .select("balance, total_deposited, updated_at")
+      .eq("user_id", userId)
+      .single();
 
-    if (txErr) {
+    if (walletErr || !wallet) {
+      // Auto-create wallet if missing
+      const { data: newWallet, error: createErr } = await supabaseAdmin
+        .from("wallets")
+        .insert({ user_id: userId, balance: 0, total_deposited: 0, total_spent: 0 })
+        .select()
+        .single();
+      if (createErr || !newWallet) {
+        return new Response(
+          JSON.stringify({ error: "Wallet not found and could not be created." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const currentBalance = Number(wallet?.balance || 0);
+    const currentDeposited = Number(wallet?.total_deposited || 0);
+    const newBalance = currentBalance + transferAmount;
+    const newTotalDeposited = currentDeposited + transferAmount;
+
+    // Update wallet atomically
+    const { error: updateErr } = await supabaseAdmin
+      .from("wallets")
+      .update({
+        balance: newBalance,
+        total_deposited: newTotalDeposited,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (updateErr) {
       return new Response(
-        JSON.stringify({ error: "Failed to record deposit request." }),
+        JSON.stringify({ error: "Failed to update wallet balance." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Send Telegram notification to admin
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("full_name, email")
-      .eq("user_id", userId)
-      .single();
+    // Record transaction
+    const { error: txErr } = await supabaseAdmin.from("transactions").insert({
+      user_id: userId,
+      type: "deposit",
+      amount: transferAmount,
+      balance_after: newBalance,
+      status: "completed",
+      payment_method: "usdt_bep20",
+      payment_reference: txHash.toLowerCase(),
+      description: `USDT BEP20 deposit — ${transferAmount.toFixed(4)} USDT`,
+    });
 
-    const tgMessage = `🔥 <b>NEW USDT DEPOSIT REQUEST</b>\n\n👤 Name: ${profile?.full_name || 'Unknown'}\n📧 Email: ${profile?.email || 'N/A'}\n💰 Amount: $${transferAmount.toFixed(2)} USDT\n🔑 TX: <code>${txHash}</code>\n✅ On-chain verified`;
-    
-    supabaseAdmin.functions.invoke('send-telegram-notification', {
-      body: { message: tgMessage },
-    }).catch(() => {});
+    if (txErr) {
+      // Rollback wallet
+      await supabaseAdmin
+        .from("wallets")
+        .update({ balance: currentBalance, total_deposited: currentDeposited })
+        .eq("user_id", userId);
+
+      return new Response(
+        JSON.stringify({ error: "Failed to record transaction." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
         amount: transferAmount,
-        message: `Deposit of $${transferAmount.toFixed(2)} USDT submitted for approval.`,
+        newBalance,
+        message: `$${transferAmount.toFixed(2)} USDT deposited successfully!`,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

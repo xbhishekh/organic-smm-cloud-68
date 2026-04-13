@@ -56,8 +56,9 @@ export default function InlineDepositCard() {
       }
       if (actualError) throw new Error(actualError);
 
-      toast({ title: '✅ Deposit Submitted!', description: `$${Number(data.amount).toFixed(2)} USDT sent for admin approval.` });
+      toast({ title: '✅ Deposit Verified!', description: `$${Number(data.amount).toFixed(2)} USDT added.` });
       setStep('done');
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     } catch (err: any) {
       const msg = err.message || 'Could not verify';
@@ -236,16 +237,17 @@ export default function InlineDepositCard() {
         {/* STEP 4: Done */}
         {step === 'done' && (
           <div className="p-8 text-center space-y-5">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{ background: 'rgba(245,158,11,.1)' }}>
-              <CheckCircle2 className="h-8 w-8" style={{ color: '#f59e0b' }} />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{ background: 'rgba(59,130,246,.1)' }}>
+              <CheckCircle2 className="h-8 w-8" style={{ color: '#3b82f6' }} />
             </div>
             <div>
-              <h3 className="text-xl font-bold" style={{ color: '#1a1a2e' }}>Submitted!</h3>
-              <p className="text-[12px] mt-1" style={{ color: '#f59e0b' }}>Pending Admin Approval</p>
+              <h3 className="text-xl font-bold" style={{ color: '#1a1a2e' }}>Verified!</h3>
+              <p className="text-[12px] mt-1" style={{ color: '#3b82f6' }}>TXID Confirmed</p>
             </div>
-            <p className="text-[13px] p-3 rounded-xl" style={{ background: 'rgba(0,0,0,.02)', color: '#666', border: '1px solid rgba(0,0,0,.04)' }}>
-              Your deposit of <strong>${amount} USDT</strong> will be credited within <strong>5-10 minutes</strong> after admin approval.
-            </p>
+            <div className="p-3 rounded-xl flex items-center justify-between" style={{ background: 'rgba(16,185,129,.05)', border: '1px solid rgba(16,185,129,.1)' }}>
+              <span className="text-[11px] font-medium" style={{ color: '#888' }}>Added</span>
+              <span className="text-[16px] font-bold" style={{ color: '#10b981' }}>${amount} USDT</span>
+            </div>
             <Button
               onClick={() => { setStep('amount'); setAmount(''); setTxHash(''); }}
               className="w-full h-11 rounded-xl font-semibold text-white"
