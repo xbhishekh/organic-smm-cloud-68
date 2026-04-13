@@ -240,7 +240,10 @@ const isTerminalProviderStatus = (status?: string | null) => {
 
 const getNestedEngagementOrderLink = (value: any) => {
   if (Array.isArray(value)) {
-    return value[0]?.link || ''
+    return getNestedEngagementOrderLink(value[0])
+  }
+  if (value?.engagement_order) {
+    return getNestedEngagementOrderLink(value.engagement_order)
   }
   return value?.link || ''
 }
@@ -540,7 +543,7 @@ serve(async (req) => {
         const isBusyError = err.includes('active order') || err.includes('already has an order') || 
           err.includes('wait until') || err.includes('processing previous') || err.includes('in progress')
         if (isBusyError) {
-          const rbrLink = normalizeLink(getNestedEngagementOrderLink(rbr.engagement_order_item?.engagement_order))
+          const rbrLink = normalizeLink(getNestedEngagementOrderLink(rbr.engagement_order_item))
           if (!recentlyBusyByLink.has(rbrLink)) recentlyBusyByLink.set(rbrLink, new Set())
           recentlyBusyByLink.get(rbrLink)!.add(rbr.provider_account_id)
         }
