@@ -783,25 +783,18 @@ serve(async (req) => {
         continue
       }
 
-      // Quantity handling
+      // Quantity handling — ALWAYS boost to provider minimum to avoid repeated rejections
       let quantityToSend = run.quantity_to_send
       const serviceMinQty = item.service.min_quantity || 10
+      // Use at least 100 as absolute floor (most providers require this)
+      const effectiveMin = Math.max(serviceMinQty, 100)
       
-      if (quantityToSend < serviceMinQty) {
-        const { data: remainingRuns } = await supabase
-          .from('organic_run_schedule')
-          .select('id')
-          .eq('engagement_order_item_id', run.engagement_order_item_id)
-          .eq('status', 'pending')
-          .neq('id', run.id)
-          .limit(1)
-          
-        if (!remainingRuns || remainingRuns.length === 0) {
-          quantityToSend = Math.max(quantityToSend, serviceMinQty)
-          await supabase.from('organic_run_schedule')
-            .update({ quantity_to_send: quantityToSend })
-            .eq('id', run.id)
-        }
+      if (quantityToSend < effectiveMin) {
+        console.log(`📏 Run #${run.run_number}: qty ${quantityToSend} below min ${effectiveMin}, boosting`)
+        quantityToSend = effectiveMin
+        await supabase.from('organic_run_schedule')
+          .update({ quantity_to_send: quantityToSend })
+          .eq('id', run.id)
       }
 
       console.log(`🔄 Run #${run.run_number}: ${quantityToSend} ${item.engagement_type}, trying ${accountsToTry.length} accounts`)
