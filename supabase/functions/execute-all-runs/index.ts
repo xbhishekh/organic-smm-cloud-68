@@ -164,6 +164,27 @@ async function updateAccountLastUsed(supabase: any, accountId: string) {
     .eq('id', accountId)
 }
 
+async function claimRunLock(params: {
+  supabase: any
+  runId: string
+  expectedStatus: 'pending' | 'failed'
+  updates: Record<string, any>
+}) {
+  const { data, error } = await params.supabase
+    .from('organic_run_schedule')
+    .update(params.updates)
+    .eq('id', params.runId)
+    .eq('status', params.expectedStatus)
+    .select('id, status')
+    .maybeSingle()
+
+  return {
+    error,
+    locked: !!data,
+    row: data,
+  }
+}
+
 type ProviderStatusCheckResult =
   | { ok: true; data: any; rawText: string }
   | { ok: false; error: string; rawText: string }
@@ -989,20 +1010,28 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         
         // Atomic lock
         const currentStatus = isRetry ? 'failed' : 'pending'
-        const { error: updateError, count: lockCount } = await supabase
-          .from('organic_run_schedule')
-          .update({
+        const { error: updateError, locked: lockAcquired } = await claimRunLock({
+          supabase,
+          runId: run.id,
+          expectedStatus: currentStatus,
+          updates: {
             status: 'started', started_at: new Date().toISOString(),
             error_message: `Trying ${selectedAccount.name}...`,
             retry_count: (run.retry_count || 0) + (isRetry ? 1 : 0),
             provider_order_id: null, provider_status: null, provider_response: null,
             provider_account_id: selectedAccount.id,
             provider_account_name: selectedAccount.name,
-          })
-          .eq('id', run.id)
-          .eq('status', currentStatus)
+          },
+        })
 
-        if (updateError || lockCount === 0) {
+        if (updateError) {
+          console.error(`❌ Failed to claim run lock for ${run.id}:`, updateError)
+          break
+        }
+
+        if (!lockAcquired) {
+          console.log(`⏭️ Run #${run.run_number} already claimed by another execution, skipping duplicate send`)
+          skipped++
           break
         }
 
@@ -1142,7 +1171,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         
         const [runUpdateResult] = await Promise.all(updatePromises)
         
-        if (runUpdateResult.count === 0) {
+        if (!runUpdateResult.data || runUpdateResult.data.length === 0) {
           skipped++
           continue
         }
@@ -1284,12 +1313,18 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         continue
       }
 
-      const { error: updateError } = await supabase
-        .from('organic_run_schedule')
-        .update({ status: 'started', started_at: new Date().toISOString() })
-        .eq('id', run.id).eq('status', 'pending')
+      const { error: updateError, locked: lockAcquired } = await claimRunLock({
+        supabase,
+        runId: run.id,
+        expectedStatus: 'pending',
+        updates: { status: 'started', started_at: new Date().toISOString() },
+      })
 
       if (updateError) continue
+      if (!lockAcquired) {
+        skipped++
+        continue
+      }
 
       let lastError: string | null = null
       let providerOrderId: string | null = null
