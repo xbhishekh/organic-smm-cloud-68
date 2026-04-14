@@ -94,8 +94,10 @@ class MappingCache {
         const accounts: { account: ProviderAccount; providerServiceId: string }[] = []
         for (const mapping of sorted) {
           const account = mapping.provider_account as ProviderAccount
-          if (account && account.is_active) {
+          if (account && account.is_active && isValidHttpUrl(account.api_url)) {
             accounts.push({ account, providerServiceId: mapping.provider_service_id })
+          } else if (account && account.is_active && !isValidHttpUrl(account.api_url)) {
+            console.log(`⚠️ Skipping provider ${account.name}: invalid api_url`)
           }
         }
         this.cache.set(serviceId, accounts)
