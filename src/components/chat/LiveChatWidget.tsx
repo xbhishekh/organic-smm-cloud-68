@@ -252,7 +252,7 @@ export function LiveChatWidget() {
       return data as ChatMessage[];
     },
     enabled: !!conversation,
-    refetchInterval: 3000, // Polling fallback
+    refetchOnWindowFocus: false,
   });
 
   // Subscribe to realtime messages

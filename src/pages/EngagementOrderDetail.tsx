@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,62 +137,6 @@ export default function EngagementOrderDetail() {
       setRefetchInterval(15000); // 15s for other states
     }
   }, [order?.status, order?.items?.length]);
-
-  // Auto-execute due runs - heavily throttled to prevent server overload
-  const lastExecuteAttempt = useRef<number>(0);
-  const lastStatusCheckAttempt = useRef<number>(0);
-  
-  useEffect(() => {
-    if (!order?.items) return;
-
-    const allRuns = order.items.flatMap((item: any) => item.runs || []);
-    const dueRuns = allRuns.filter((run: any) => {
-      const scheduledAt = new Date(run.scheduled_at);
-      const now = new Date();
-      return run.status === 'pending' && scheduledAt <= now;
-    });
-    
-    const providerSyncRuns = allRuns.filter((run: any) => {
-      if (run.status === 'started') return true;
-      if (run.status === 'completed' && typeof run.error_message === 'string' && run.error_message.includes('Auto-completed')) {
-        return (
-          run.provider_status === 'Pending' ||
-          run.provider_status === 'In progress' ||
-          run.provider_status === 'Processing' ||
-          run.provider_status === 'Unverified'
-        );
-      }
-      return false;
-    });
-
-    const now = Date.now();
-    
-    // Trigger execute for due runs (every 60 seconds max — cron handles the rest)
-    const timeSinceLastExecute = now - lastExecuteAttempt.current;
-    if (dueRuns.length > 0 && timeSinceLastExecute > 60000) {
-      lastExecuteAttempt.current = now;
-      
-      supabase.functions.invoke('execute-all-runs', {
-        body: { instant: true }
-      }).then(({ data, error }) => {
-        if (!error && data?.processed > 0) {
-          refetch();
-        }
-      });
-    }
-    
-    // Trigger status check (every 45 seconds max — cron handles the rest)
-    const timeSinceLastCheck = now - lastStatusCheckAttempt.current;
-    if (providerSyncRuns.length > 0 && timeSinceLastCheck > 45000) {
-      lastStatusCheckAttempt.current = now;
-      
-      supabase.functions.invoke('check-order-status', {
-        body: {}
-      }).then(({ error }) => {
-        if (!error) refetch();
-      });
-    }
-  }, [order, refetch]);
 
   // Real-time subscription — ONLY listen for this order's changes (filtered)
   useEffect(() => {
