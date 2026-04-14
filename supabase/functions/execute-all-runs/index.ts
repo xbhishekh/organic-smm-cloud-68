@@ -94,8 +94,10 @@ class MappingCache {
         const accounts: { account: ProviderAccount; providerServiceId: string }[] = []
         for (const mapping of sorted) {
           const account = mapping.provider_account as ProviderAccount
-          if (account && account.is_active) {
+          if (account && account.is_active && isValidHttpUrl(account.api_url)) {
             accounts.push({ account, providerServiceId: mapping.provider_service_id })
+          } else if (account && account.is_active && !isValidHttpUrl(account.api_url)) {
+            console.log(`⚠️ Skipping provider ${account.name}: invalid api_url`)
           }
         }
         this.cache.set(serviceId, accounts)
@@ -113,6 +115,11 @@ class MappingCache {
 }
 
 async function checkProviderBalance(account: ProviderAccount): Promise<{ hasBalance: boolean; balance: number }> {
+  if (!isValidHttpUrl(account.api_url)) {
+    console.log(`⚠️ Balance check skipped for ${account.name}: invalid api_url`)
+    return { hasBalance: false, balance: 0 }
+  }
+
   const cached = balanceCache.get(account.id)
   if (cached && Date.now() - cached.checkedAt < 30000) {
     return { hasBalance: cached.balance > 0, balance: cached.balance }
@@ -230,6 +237,16 @@ const detectPlatformFromService = (serviceName: string): string | null => {
 }
 
 const isValidUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
+
+const isValidHttpUrl = (value?: string | null) => {
+  if (!value) return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 const normalizeLink = (value?: string | null) => (value || '').toLowerCase().trim().replace(/\/$/, '')
 
@@ -861,9 +878,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       if (item.service.provider_id && isValidUUID(item.service.provider_id)) {
         const { data: provider } = await supabase
           .from('providers').select('*')
-          .eq('id', item.service.provider_id).single()
+          .eq('id', item.service.provider_id).maybeSingle()
         
-        if (provider && isValidUUID(provider.id)) {
+        if (provider && isValidUUID(provider.id) && isValidHttpUrl(provider.api_url)) {
           defaultProvider = {
             id: provider.id, provider_id: provider.id, name: provider.name,
             api_key: provider.api_key, api_url: provider.api_url,
@@ -938,7 +955,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           const { data: freshItem } = await supabase
             .from('engagement_order_items')
             .select('status, engagement_order:engagement_orders(status)')
-            .eq('id', item.id).single()
+            .eq('id', item.id).maybeSingle()
           
           const freshOrderStatus = (freshItem as any)?.engagement_order?.status
           const freshItemStatus = freshItem?.status
@@ -964,6 +981,11 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           lastError = `Provider ${selectedAccount.name} balance too low (${providerBalance})`
           continue
         }
+
+        if (!isValidHttpUrl(selectedAccount.api_url)) {
+          lastError = `Provider ${selectedAccount.name} has invalid API URL`
+          continue
+        }
         
         // Atomic lock
         const currentStatus = isRetry ? 'failed' : 'pending'
@@ -983,8 +1005,6 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         if (updateError || lockCount === 0) {
           break
         }
-
-        await updateAccountLastUsed(supabase, selectedAccount.id)
 
         try {
           const formData = new URLSearchParams()
@@ -1058,6 +1078,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             providerResult = { add: result }
             successAccount = selectedAccount
             success = true
+            await updateAccountLastUsed(supabase, selectedAccount.id)
             console.log(`✅ Run #${run.run_number} placed via ${selectedAccount.name}! Order ID: ${providerOrderId} (status check deferred)`)
             break
           }
@@ -1073,7 +1094,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         const { data: freshItemPostSend } = await supabase
           .from('engagement_order_items')
           .select('status, engagement_order:engagement_orders(status)')
-          .eq('id', item.id).single()
+          .eq('id', item.id).maybeSingle()
         
         const postSendOrderStatus = (freshItemPostSend as any)?.engagement_order?.status
         const postSendItemStatus = freshItemPostSend?.status
@@ -1245,11 +1266,19 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
 
       const { data: provider } = await supabase
         .from('providers').select('*')
-        .eq('id', order.service.provider_id).single()
+        .eq('id', order.service.provider_id).maybeSingle()
 
       if (!provider) {
         await supabase.from('organic_run_schedule').update({
           status: 'failed', error_message: 'Provider not found',
+        }).eq('id', run.id)
+        failed++
+        continue
+      }
+
+      if (!isValidHttpUrl(provider.api_url)) {
+        await supabase.from('organic_run_schedule').update({
+          status: 'failed', error_message: 'Provider has invalid API URL',
         }).eq('id', run.id)
         failed++
         continue
