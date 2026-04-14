@@ -938,33 +938,13 @@ serve(async (req) => {
               continue
             }
 
-            const statusCheck = await checkProviderOrderStatusWithRetries({
-              apiUrl: selectedAccount.api_url, apiKey: selectedAccount.api_key,
-              providerOrderId, maxAttempts: 3, attemptDelayMs: 1500,
-            })
-
-            if (!statusCheck.ok) {
-              lastError = `Verification failed: ${statusCheck.error}`
-              providerResult = { add: result, verify_error: statusCheck.error, verify_raw: statusCheck.rawText }
-              verifiedStatus = 'Pending Verification'
-              successAccount = selectedAccount
-              success = true
-              break 
-            }
-
-            verifiedStatus = statusCheck.data?.status?.toString() || null
-            const startCountParsed = parseInt(statusCheck.data?.start_count)
-            verifiedStartCount = Number.isFinite(startCountParsed) ? startCountParsed : null
-            const remainsParsed = parseInt(statusCheck.data?.remains)
-            verifiedRemains = Number.isFinite(remainsParsed) ? remainsParsed : null
-            const chargeParsed = parseFloat(statusCheck.data?.charge)
-            verifiedCharge = Number.isFinite(chargeParsed) ? chargeParsed : null
-            verifiedLastStatusCheck = new Date().toISOString()
-
-            providerResult = { add: result, status: statusCheck.data }
+            // SKIP immediate verification — let check-order-status handle it
+            // This saves 3-5 seconds per run, roughly doubling throughput
+            verifiedStatus = 'Pending'
+            providerResult = { add: result }
             successAccount = selectedAccount
             success = true
-            console.log(`✅ Run #${run.run_number} verified via ${selectedAccount.name}! Order ID: ${providerOrderId}`)
+            console.log(`✅ Run #${run.run_number} placed via ${selectedAccount.name}! Order ID: ${providerOrderId} (status check deferred)`)
             break
           }
         } catch (fetchError: any) {
