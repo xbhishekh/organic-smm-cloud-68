@@ -437,6 +437,14 @@ serve(async (req) => {
   }
 })
 
+async function processAllRuns(supabase: any, executionId: string, startTime: number) {
+  try {
+    let processed = 0
+    let skipped = 0
+    let failed = 0
+    let retried = 0
+    const results: any[] = []
+
     // ==========================================
     // OPTIMIZATION: Single mapping cache for entire invocation
     // ==========================================
