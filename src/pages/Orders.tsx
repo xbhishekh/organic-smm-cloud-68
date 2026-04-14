@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -67,7 +67,6 @@ interface EditRunData {
 export default function Orders() {
   const { user, wallet, refreshWallet } = useAuth();
   const { formatPrice } = useCurrency();
-  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -209,28 +208,6 @@ export default function Orders() {
     const order = orders.find(o => o.id === expandedOrder);
     return order ? Number(order.price) / (order.quantity / 1000) : 0.1;
   };
-
-  // Auto-trigger execution for due runs (throttled - max once per 60s)
-  const lastExecuteRef = useRef<number>(0);
-  useEffect(() => {
-    if (!organicRuns) return;
-    
-    const now = Date.now();
-    if (now - lastExecuteRef.current < 60000) return; // Skip if called within 60s
-    
-    const dueRuns = organicRuns.filter(r => {
-      if (r.status !== 'pending') return false;
-      return new Date(r.scheduled_at) <= new Date();
-    });
-
-    if (dueRuns.length > 0) {
-      lastExecuteRef.current = now;
-      supabase.functions.invoke('execute-all-runs', { body: {} })
-        .then(({ error }) => {
-          if (!error) refetch();
-        });
-    }
-  }, [organicRuns]);
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
