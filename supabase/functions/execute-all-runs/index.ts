@@ -780,12 +780,34 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         }
       }
       
-      // From active (started) runs for same link+service
+      // From active (started) runs for same link+type
       const startedRunsForLink = (activeRuns || []).filter((r: any) => {
         const runLink = normalizeLink(r.engagement_order_item?.engagement_order?.link)
-        const runServiceId = r.engagement_order_item?.service_id || ''
-        return runLink === sameLink && runServiceId === currentServiceId
+        const runType = (r.engagement_order_item?.engagement_type || '').toLowerCase()
+        return runLink === sameLink && runType === currentTypeNormalized
       })
+      
+      // ROUND-ROBIN: Also exclude providers from recently completed runs (last 5 min) for same link+type
+      // This ensures Run #2 goes to a different provider than Run #1
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const { data: recentCompletedRuns } = await supabase
+        .from('organic_run_schedule')
+        .select('provider_account_id, engagement_order_item:engagement_order_items(engagement_type, engagement_order:engagement_orders(link))')
+        .in('status', ['started', 'completed'])
+        .not('provider_account_id', 'is', null)
+        .gte('started_at', fiveMinAgo)
+      
+      if (recentCompletedRuns) {
+        for (const rcr of recentCompletedRuns) {
+          const rcrLink = normalizeLink(getNestedEngagementOrderLink(rcr.engagement_order_item))
+          const rcrType = (rcr.engagement_order_item?.engagement_type || '').toLowerCase()
+          if (rcrLink === sameLink && rcrType === currentTypeNormalized && rcr.provider_account_id) {
+            if (!busyAccountIds.includes(rcr.provider_account_id)) {
+              busyAccountIds.push(rcr.provider_account_id)
+            }
+          }
+        }
+      }
       
       if (startedRunsForLink && startedRunsForLink.length > 0) {
         for (const stuckRun of startedRunsForLink) {
