@@ -787,24 +787,24 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         return runLink === sameLink && runType === currentTypeNormalized
       })
       
-      // ROUND-ROBIN: Also exclude providers from recently completed runs (last 5 min) for same link+type
-      // This ensures Run #2 goes to a different provider than Run #1
+      // ROUND-ROBIN: Prefer a different provider after a recent completion,
+      // but do NOT hard-block the just-used provider.
+      // Otherwise next run can get stuck even after the previous one is completed.
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
       const { data: recentCompletedRuns } = await supabase
         .from('organic_run_schedule')
         .select('provider_account_id, engagement_order_item:engagement_order_items(engagement_type, engagement_order:engagement_orders(link))')
-        .in('status', ['started', 'completed'])
+        .eq('status', 'completed')
         .not('provider_account_id', 'is', null)
-        .gte('started_at', fiveMinAgo)
+        .gte('completed_at', fiveMinAgo)
       
+      const recentCompletedAccountIds = new Set<string>()
       if (recentCompletedRuns) {
         for (const rcr of recentCompletedRuns) {
           const rcrLink = normalizeLink(getNestedEngagementOrderLink(rcr.engagement_order_item))
           const rcrType = (rcr.engagement_order_item?.engagement_type || '').toLowerCase()
           if (rcrLink === sameLink && rcrType === currentTypeNormalized && rcr.provider_account_id) {
-            if (!busyAccountIds.includes(rcr.provider_account_id)) {
-              busyAccountIds.push(rcr.provider_account_id)
-            }
+            recentCompletedAccountIds.add(rcr.provider_account_id)
           }
         }
       }
@@ -873,6 +873,11 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       }
       
       const accountsToTry: { account: ProviderAccount; providerServiceId: string }[] = [...availableAccounts]
+      accountsToTry.sort((a, b) => {
+        const aRecent = recentCompletedAccountIds.has(a.account.id) ? 1 : 0
+        const bRecent = recentCompletedAccountIds.has(b.account.id) ? 1 : 0
+        return aRecent - bRecent
+      })
       if (defaultProvider && !accountsToTry.some(a => a.account.id === defaultProvider!.id)) {
         accountsToTry.push({ account: defaultProvider, providerServiceId: item.service.provider_service_id })
       }
