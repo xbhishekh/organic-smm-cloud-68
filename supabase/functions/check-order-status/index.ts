@@ -369,25 +369,6 @@ Deno.serve(async (req) => {
               await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
             }
           }
-        } else if (run.status === 'started' && isStatusStuck && ageMinutes >= 10) {
-          await supabase.from('organic_run_schedule').update({
-            ...trackingUpdate,
-            status: 'completed',
-            completed_at: new Date().toISOString(),
-            error_message: `Auto-completed after ${ageMinutes}min (status: ${result.status || 'unknown'})`
-          }).eq('id', run.id)
-
-          completed++
-          results.push({
-            run_id: run.id,
-            run_number: run.run_number,
-            type: run.engagement_order_item?.engagement_type,
-            status: 'completed',
-            provider_order_id: run.provider_order_id,
-            delivered: delivered,
-            remains: remains
-          })
-          await updateEngagementOrderStatus(supabase, run.engagement_order_item?.engagement_order_id, run.engagement_order_item?.id)
         } else if (deliveredAll) {
           await supabase.from('organic_run_schedule').update({
             ...trackingUpdate,
@@ -588,19 +569,6 @@ Deno.serve(async (req) => {
             }).eq('id', run.id)
 
             failed++
-            await updateLegacyOrderStatus(supabase, run.order_id)
-
-          } else if (run.status === 'started' && isStuckTooLong) {
-            // Auto-complete stuck runs for legacy orders too
-            console.log(`⏰ Auto-completing legacy run #${run.run_number} after ${ageMinutes}min (status: ${providerStatus})`)
-            await supabase.from('organic_run_schedule').update({
-              ...trackingUpdate,
-              status: 'completed',
-              completed_at: new Date().toISOString(),
-              error_message: `Auto-completed after ${ageMinutes}min (status: ${result.status})`
-            }).eq('id', run.id)
-
-            completed++
             await updateLegacyOrderStatus(supabase, run.order_id)
 
           } else {
