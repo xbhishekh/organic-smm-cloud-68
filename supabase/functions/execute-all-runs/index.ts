@@ -518,7 +518,7 @@ serve(async (req) => {
 
     // Deduplicate: max 3 concurrent per item
     const itemRunCount = new Map<string, number>()
-    const MAX_CONCURRENT_PER_ITEM = 3
+    const MAX_CONCURRENT_PER_ITEM = 5
     const executionProviderMap = new Map<string, Set<string>>()
     // Track link+type combos where ALL providers returned "active order" — only skip same type
     const activeOrderLinkTypes = new Set<string>()
