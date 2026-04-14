@@ -453,7 +453,7 @@ serve(async (req) => {
         .not('engagement_order_item_id', 'is', null)
         .lte('scheduled_at', nowWithBuffer)
         .order('scheduled_at', { ascending: true })
-        .limit(2000),
+        .limit(8000),
       // 4. Failed engagement runs for retry
       supabase
         .from('organic_run_schedule')
