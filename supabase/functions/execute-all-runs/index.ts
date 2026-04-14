@@ -361,6 +361,40 @@ async function updateEngagementOrderStatus(supabase: SupabaseClient, engagementO
   await supabase.from('engagement_orders').update({ status: orderStatus }).eq('id', engagementOrderId).neq('status', 'cancelled')
 }
 
+async function triggerContinuation(executionId: string, reason: string) {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+
+    if (!supabaseUrl || !anonKey) {
+      console.error(`⚠️ Cannot continue [${executionId}] - missing backend env vars`)
+      return false
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/execute-all-runs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${anonKey}`,
+        'apikey': anonKey,
+      },
+      body: JSON.stringify({ continued_from: executionId, reason }),
+    })
+
+    if (!response.ok) {
+      const responseText = await response.text()
+      console.error(`⚠️ Continuation trigger failed [${executionId}]: ${response.status} ${responseText}`)
+      return false
+    }
+
+    console.log(`🔁 Continuation queued for [${executionId}] (${reason})`)
+    return true
+  } catch (error) {
+    console.error(`⚠️ Continuation request error [${executionId}]:`, error)
+    return false
+  }
+}
+
 // Declare EdgeRuntime for waitUntil support
 declare const EdgeRuntime: { waitUntil(promise: Promise<any>): void }
 
@@ -443,6 +477,8 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
     let skipped = 0
     let failed = 0
     let retried = 0
+    let shouldContinue = false
+    let continuationReason: string | null = null
     const results: any[] = []
 
     // ==========================================
@@ -607,6 +643,8 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
     for (const run of allEngagementRuns) {
       // Timeout guard: if we've been running for 50s, stop to avoid edge function timeout
       if (Date.now() - startTime > 50000) {
+        shouldContinue = true
+        continuationReason = 'engagement-time-slice-exhausted'
         console.log(`⏰ Approaching timeout (${Date.now() - startTime}ms), stopping processing. Remaining runs will be picked up next cycle.`)
         break
       }
@@ -1135,6 +1173,8 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
 
     for (const run of legacyRuns || []) {
       if (Date.now() - startTime > 55000) {
+        shouldContinue = true
+        continuationReason = continuationReason || 'legacy-time-slice-exhausted'
         console.log(`⏰ Approaching timeout, stopping legacy processing.`)
         break
       }
@@ -1265,6 +1305,11 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
     }
 
     const totalTime = Date.now() - startTime
+
+    if (shouldContinue) {
+      await triggerContinuation(executionId, continuationReason || 'time-slice-exhausted')
+    }
+
     console.log(`\n=== EXECUTION COMPLETE [${executionId}] in ${totalTime}ms ===`)
     console.log(`Processed: ${processed}, Skipped: ${skipped}, Failed: ${failed}, Retried: ${retried}`)
 
