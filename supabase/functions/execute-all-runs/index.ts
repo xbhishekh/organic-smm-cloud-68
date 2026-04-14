@@ -546,14 +546,14 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       return true
     })
 
-    // Deduplicate: max 3 concurrent per item
+    // Fairness: give each item's earliest due run a chance before taking more runs from the same item
     const itemRunCount = new Map<string, number>()
-    const MAX_CONCURRENT_PER_ITEM = 5
+    const MAX_CONCURRENT_PER_ITEM = 1
     const executionProviderMap = new Map<string, Set<string>>()
     // Track link+type combos where ALL providers returned "active order" — only skip same type
     const activeOrderLinkTypes = new Set<string>()
-    
-    const deduplicatedRuns = activeEngagementRuns.filter(run => {
+
+    const pendingRunsLimitedPerItem = activeEngagementRuns.filter(run => {
       const itemId = run.engagement_order_item_id
       const count = itemRunCount.get(itemId) || 0
       if (count < MAX_CONCURRENT_PER_ITEM) {
@@ -572,8 +572,18 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       return true
     })
 
-    const allEngagementRuns = [...deduplicatedRuns, ...activeFailedRuns]
-    console.log(`Processing ${allEngagementRuns.length} runs (${deduplicatedRuns.length} pending + ${activeFailedRuns.length} retry), total overdue in DB: check query`)
+    const retryRunsLimitedPerItem = activeFailedRuns.filter(run => {
+      const itemId = run.engagement_order_item_id
+      const count = itemRunCount.get(itemId) || 0
+      if (count < MAX_CONCURRENT_PER_ITEM) {
+        itemRunCount.set(itemId, count + 1)
+        return true
+      }
+      return false
+    })
+
+    const allEngagementRuns = [...pendingRunsLimitedPerItem, ...retryRunsLimitedPerItem]
+    console.log(`Processing ${allEngagementRuns.length} runs (${pendingRunsLimitedPerItem.length} pending + ${retryRunsLimitedPerItem.length} retry), total overdue in DB: check query`)
 
     // PRE-BUILD busy account lookup for recently busy runs (link → Set<accountId>)
     const recentlyBusyByLinkType = new Map<string, Set<string>>()
