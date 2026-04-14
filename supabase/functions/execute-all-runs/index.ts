@@ -955,7 +955,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           const { data: freshItem } = await supabase
             .from('engagement_order_items')
             .select('status, engagement_order:engagement_orders(status)')
-            .eq('id', item.id).single()
+            .eq('id', item.id).maybeSingle()
           
           const freshOrderStatus = (freshItem as any)?.engagement_order?.status
           const freshItemStatus = freshItem?.status
@@ -981,6 +981,11 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           lastError = `Provider ${selectedAccount.name} balance too low (${providerBalance})`
           continue
         }
+
+        if (!isValidHttpUrl(selectedAccount.api_url)) {
+          lastError = `Provider ${selectedAccount.name} has invalid API URL`
+          continue
+        }
         
         // Atomic lock
         const currentStatus = isRetry ? 'failed' : 'pending'
@@ -1000,8 +1005,6 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         if (updateError || lockCount === 0) {
           break
         }
-
-        await updateAccountLastUsed(supabase, selectedAccount.id)
 
         try {
           const formData = new URLSearchParams()
@@ -1075,6 +1078,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             providerResult = { add: result }
             successAccount = selectedAccount
             success = true
+            await updateAccountLastUsed(supabase, selectedAccount.id)
             console.log(`✅ Run #${run.run_number} placed via ${selectedAccount.name}! Order ID: ${providerOrderId} (status check deferred)`)
             break
           }
@@ -1090,7 +1094,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         const { data: freshItemPostSend } = await supabase
           .from('engagement_order_items')
           .select('status, engagement_order:engagement_orders(status)')
-          .eq('id', item.id).single()
+          .eq('id', item.id).maybeSingle()
         
         const postSendOrderStatus = (freshItemPostSend as any)?.engagement_order?.status
         const postSendItemStatus = freshItemPostSend?.status
