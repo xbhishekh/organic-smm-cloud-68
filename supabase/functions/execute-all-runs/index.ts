@@ -878,9 +878,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       if (item.service.provider_id && isValidUUID(item.service.provider_id)) {
         const { data: provider } = await supabase
           .from('providers').select('*')
-          .eq('id', item.service.provider_id).single()
+          .eq('id', item.service.provider_id).maybeSingle()
         
-        if (provider && isValidUUID(provider.id)) {
+        if (provider && isValidUUID(provider.id) && isValidHttpUrl(provider.api_url)) {
           defaultProvider = {
             id: provider.id, provider_id: provider.id, name: provider.name,
             api_key: provider.api_key, api_url: provider.api_url,
